@@ -35,6 +35,50 @@ MODEL_CARDS: tuple[ModelCard, ...] = (
         ),
     ),
     ModelCard(
+        label="Google Gemini 3.8",
+        cite_key="Gem38",
+        tool_note=(
+            "Google DeepMind's Gemini 3.8 family as integrated in Cursor: alternative "
+            "proof sketches, inventory review, and cross-checks of the PROGIC 2013 "
+            "translation against the working transcription."
+        ),
+        reference=(
+            "Google DeepMind. *Gemini 3.8*. Technical documentation and model cards, "
+            "<https://ai.google.dev/>; model documentation as integrated in Cursor, "
+            "<https://cursor.com/docs/models> (accessed 2026)."
+        ),
+    ),
+    ModelCard(
+        label="Cursor Grok 4.6",
+        cite_key="Grk26",
+        tool_note=(
+            "primary SpaceXAI / Cursor agent for the Agda `--safe` formalization of "
+            "Scott's 2013 *Stochastic λ-Calculi*: graph-model encodings, Cantor-space "
+            "random variables, Theorem 4.2, `agda --safe` repair, drafting this "
+            "narrative (`arxiv.md`), and tracking the formalized inventory."
+        ),
+        reference=(
+            "SpaceXAI and Anysphere, Inc. *Grok 4.6*. Official model card, "
+            "<https://media.x.ai/v1/website/card-7f81d41b.pdf>; developer documentation, "
+            "<https://docs.x.ai/developers/models/grok-4.6>; Cursor model page, "
+            "<https://cursor.com/docs/models/grok-4-6>; Cursor announcement, "
+            "<https://cursor.com/blog/grok-4-6> (accessed 2026)."
+        ),
+    ),
+    ModelCard(
+        label="GPT-5.6",
+        cite_key="Gpt26",
+        tool_note=(
+            "OpenAI's GPT-5.6 family in Cursor (Sol variant) for Agda scaffolding, "
+            "`agda --safe` repair, and long-running agent loops on `Scott2013/`. "
+            "Generated Agda was provisional until it typechecked under `--safe`."
+        ),
+        reference=(
+            "OpenAI. *GPT-5.6* (Sol variant as integrated in Cursor). Model documentation, "
+            "<https://cursor.com/docs/models/gpt-5-6-sol> (accessed 2026)."
+        ),
+    ),
+    ModelCard(
         label="Cursor Composer 2.5 Fast",
         cite_key="Cmp25",
         tool_note=(

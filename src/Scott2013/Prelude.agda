@@ -260,3 +260,39 @@ All-mono : {A : Set} {P Q : A → Set} (xs : List A) →
            (∀ x → P x → Q x) → All P xs → All Q xs
 All-mono []       _  _        = tt
 All-mono (x ∷ xs) pq (px , p) = pq x px , All-mono xs pq p
+
+infixr 5 _++_
+
+_++_ : {A : Set} → List A → List A → List A
+[]       ++ ys = ys
+(x ∷ xs) ++ ys = x ∷ (xs ++ ys)
+
+∈-++-left : {A : Set} {x : A} (xs ys : List A) →
+            x ∈-list xs → x ∈-list (xs ++ ys)
+∈-++-left (x ∷ xs) ys here      = here
+∈-++-left (y ∷ xs) ys (there i) = there (∈-++-left xs ys i)
+
+∈-++-right : {A : Set} {x : A} (xs ys : List A) →
+             x ∈-list ys → x ∈-list (xs ++ ys)
+∈-++-right []       ys i = i
+∈-++-right (y ∷ xs) ys i = there (∈-++-right xs ys i)
+
+∈-++-split : {A : Set} {x : A} (xs ys : List A) →
+             x ∈-list (xs ++ ys) → (x ∈-list xs) ⊎ (x ∈-list ys)
+∈-++-split []       ys i        = inj₂ i
+∈-++-split (x ∷ xs) ys here     = inj₁ here
+∈-++-split (x ∷ xs) ys (there i) with ∈-++-split xs ys i
+... | inj₁ j = inj₁ (there j)
+... | inj₂ j = inj₂ j
+
+length : {A : Set} → List A → ℕ
+length []       = zero
+length (_ ∷ xs) = suc (length xs)
+
+∈-list-dec : (x : ℕ) (xs : List ℕ) → (x ∈-list xs) ⊎ ¬ (x ∈-list xs)
+∈-list-dec x [] = inj₂ λ ()
+∈-list-dec x (y ∷ ys) with ℕ-eq-dec x y
+... | inj₁ refl = inj₁ here
+... | inj₂ ne with ∈-list-dec x ys
+...   | inj₁ i  = inj₁ (there i)
+...   | inj₂ ni = inj₂ λ { here → ne refl ; (there i) → ni i }

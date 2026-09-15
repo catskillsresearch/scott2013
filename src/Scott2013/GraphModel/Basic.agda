@@ -354,3 +354,120 @@ pair-injective n₁ m₁ n₂ m₂ eq =
     both : (n₁ , m₁) ≡ (n₂ , m₂)
     both = trans (sym (unpair-pair n₁ m₁))
                  (trans (cong unpair eq) (unpair-pair n₂ m₂))
+
+⊆-refl : ∀ {X} → X ⊆ X
+⊆-refl p = p
+
+_∩ₚ_ : 𝒫ℕ → 𝒫ℕ → 𝒫ℕ
+(X ∩ₚ Y) n = X n × Y n
+
+_∪ₚ_ : 𝒫ℕ → 𝒫ℕ → 𝒫ℕ
+(X ∪ₚ Y) n = X n ⊎ Y n
+
+infixr 6 _∩ₚ_
+infixr 5 _∪ₚ_
+
+Finite : 𝒫ℕ → Set
+Finite X = Σ ℕ (λ n → ∀ m → X m ↔ (m ∈-set n))
+
+*2-double : ∀ m → 2 * m ≡ m + m
+*2-double m = cong (m +_) (+-zero m)
+
+pow2-is-suc : ∀ n → Σ ℕ (λ k → 2 ^ n ≡ suc k)
+pow2-is-suc zero = zero , refl
+pow2-is-suc (suc n) with pow2-is-suc n
+... | k , eq = suc (k + k) ,
+  trans (*2-double (2 ^ n)) (trans (cong (λ x → x + x) eq) (suc-double k))
+
+<⇒≤ : ∀ {a b} → a < b → a ≤ b
+<⇒≤ a<b = ≤-trans (≤-suc ≤-refl) a<b
+
+pair-second-< : ∀ a b → b < pair a b
+pair-second-< a b with pow2-is-suc a
+... | k , eq =
+  ≤-trans (s≤s (n≤n+m b b))
+          (subst (λ p → suc (b + b) ≤ p * suc (b + b)) (sym eq)
+                 (n≤n+m (suc (b + b)) (k * suc (b + b))))
+
+-- Sequence-number concatenation: members (seq-append n m) ≡ members n ++ members m
+seq-append-acc : ∀ n → Acc n → ℕ → ℕ
+seq-append-acc zero        _        m = m
+seq-append-acc (suc k)     (acc rec) m =
+  let (ns , x) = unpair (suc k)
+  in  pair (seq-append-acc ns (rec ns (unpair-fst-< k)) m) x
+
+seq-append : ℕ → ℕ → ℕ
+seq-append n m = seq-append-acc n (<-wf n) m
+
+seq-append-acc-irrel : ∀ n (p q : Acc n) m →
+                       seq-append-acc n p m ≡ seq-append-acc n q m
+seq-append-acc-irrel zero    p q m = refl
+seq-append-acc-irrel (suc k) (acc rp) (acc rq) m =
+  cong (λ n′ → pair n′ (proj₂ (unpair (suc k))))
+       (seq-append-acc-irrel (proj₁ (unpair (suc k)))
+         (rp (proj₁ (unpair (suc k))) (unpair-fst-< k))
+         (rq (proj₁ (unpair (suc k))) (unpair-fst-< k))
+         m)
+
+seq-append-zero : ∀ m → seq-append zero m ≡ m
+seq-append-zero m = refl
+
+members-unfold-suc : ∀ k →
+  members (suc k) ≡ proj₂ (unpair (suc k)) ∷ members (proj₁ (unpair (suc k)))
+members-unfold-suc k = unfold (<-wf (suc k))
+  where
+    unfold : (p : Acc (suc k)) →
+      members-acc (suc k) p ≡
+        proj₂ (unpair (suc k)) ∷ members (proj₁ (unpair (suc k)))
+    unfold (acc rec) =
+      cong (proj₂ (unpair (suc k)) ∷_)
+        (members-acc-irrel (proj₁ (unpair (suc k)))
+          (rec (proj₁ (unpair (suc k))) (unpair-fst-< k))
+          (<-wf (proj₁ (unpair (suc k)))))
+
+members-seq-append : ∀ n m → members (seq-append n m) ≡ members n ++ members m
+members-seq-append n m = go n (<-wf n)
+  where
+    go : ∀ n (p : Acc n) →
+         members (seq-append-acc n p m) ≡ members n ++ members m
+    go zero        p        = refl
+    go (suc k)     (acc rec) =
+      let ns  = proj₁ (unpair (suc k))
+          x   = proj₂ (unpair (suc k))
+          pns = rec ns (unpair-fst-< k)
+      in  trans (members-pair (seq-append-acc ns pns m) x)
+          (trans (cong (x ∷_) (go ns pns))
+                 (cong (_++ members m) (sym (members-unfold-suc k))))
+
+∈*-append : ∀ {X} n m → n ∈* X → m ∈* X → seq-append n m ∈* X
+∈*-append {X} n m n∈ m∈ =
+  subst (All X) (sym (members-seq-append n m))
+    (all-++ (members n) (members m) n∈ m∈)
+  where
+    all-++ : ∀ xs ys → All X xs → All X ys → All X (xs ++ ys)
+    all-++ []       ys _        q = q
+    all-++ (x ∷ xs) ys (px , p) q = px , all-++ xs ys p q
+
+-- Every member of set(k) is strictly smaller than k (k > 0).
+members-bounded : ∀ k x → x ∈-set k → x < k
+members-bounded k x i = go k (<-wf k) x i
+  where
+    go : ∀ k → Acc k → ∀ x → x ∈-set k → x < k
+    go zero        _        x ()
+    go (suc k)     (acc rec) x i =
+      from-cons (subst (x ∈-list_) (members-unfold-suc k) i)
+      where
+        y<sk : proj₂ (unpair (suc k)) < suc k
+        y<sk with unpair-acc-correct (suc k) (<-wf (suc k))
+        ... | inj₁ ()
+        ... | inj₂ peq =
+          subst (proj₂ (unpair (suc k)) <_) peq
+                (pair-second-< (proj₁ (unpair (suc k))) (proj₂ (unpair (suc k))))
+
+        from-cons : x ∈-list (proj₂ (unpair (suc k)) ∷ members (proj₁ (unpair (suc k)))) → x < suc k
+        from-cons here =
+          y<sk
+        from-cons (there j) =
+          <≤-trans (go (proj₁ (unpair (suc k))) (rec (proj₁ (unpair (suc k))) (unpair-fst-< k)) x j)
+                   (<⇒≤ (unpair-fst-< k))
+

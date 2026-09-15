@@ -31,9 +31,8 @@ sources, but this repository imports none of the sibling libraries. The
 report is being prepared as **CMU-CS-26-XXX** and will be cross-archived on
 arXiv under cs.LO and math.LO.
 
-The current library is bootstrap scaffolding: it proves Scott's pairing
-function and `pair-ne-zero`. The numbered theorems of §§3–4 will be added
-as the library grows.
-
 The development lives in `src/Scott2013/`. There are no postulates. The
-pairing module uses only `Agda.Builtin.Nat` and `Agda.Builtin.Equality`.
+library uses only Agda builtins (`Nat`, `Equality`, `Bool`, `Unit`) plus
+a local prelude. Numbered results of §§2–5 are recorded in `arxiv.md`
+§3.4; sample space is Cantor space `ℕ → Bool` with Borel codes and
+cylinder measure in place of Lebesgue measure on `[0,1]`.

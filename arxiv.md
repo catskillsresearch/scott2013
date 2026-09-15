@@ -64,15 +64,19 @@ Finite sets use $\mathrm{set}(0)=\emptyset$ and
 $\mathrm{set}((n,m))=\mathrm{set}(n)\cup\{m\}$. Kleene star is
 $X^*=\{n\mid \mathrm{set}(n)\subseteq X\}$.
 
-The current library encodes pairing and proves that pairs are nonzero, so
-that $0$ remains available for the empty sequence:
+The library encodes pairing, proves that pairs are nonzero (so $0$ remains
+the empty sequence), and inverts pairing on every positive integer:
 
 ```agda
 pair : ℕ → ℕ → ℕ
 pair n m = 2 ^ n * suc (m + m)
 
 pair-ne-zero : (n m : ℕ) → pair n m ≢ 0
+unpair-pair : ∀ n m → unpair (pair n m) ≡ (n , m)
 ```
+
+Sequence numbers, $\mathrm{set}(n)$, and Kleene star are `members`,
+`setₚ`, and `_∈*_` in `Scott2013.GraphModel.Basic`.
 
 ### 2.2 Enumeration operators and the graph model
 
@@ -85,23 +89,27 @@ the least-fixed-point combinator $\nabla=\lambda X.\Phi(X(X))$.
 
 ### 2.3 Random variables
 
-A random variable is a map $X:[0,1]\to\mathcal{P}(\mathbb{N})$ whose
-coordinate events are Lebesgue measurable (Definition 4.1). Theorem 4.2
-closes this class under pointwise application. Theorems 4.4 and 4.5 recover
-regular and probabilistic languages from a sequentializer combinator.
+Scott takes $X:[0,1]\to\mathcal{P}(\mathbb{N})$ with Lebesgue-measurable
+coordinate events (Definition 4.1). This formalization uses Cantor space
+$\Omega=\mathbb{N}\to\mathrm{Bool}$ with Borel codes and cylinder measure
+$2^{-k}$ on $k$-bit assignments, which the paper explicitly allows.
+Theorem 4.2 closes random variables under pointwise application.
+Theorems 4.4 and 4.5 recover regular and probabilistic languages from the
+sequentializer. The event $[\![X=Y]\!]$ is not claimed constructively.
 
 ## 3. Agda Architecture and Design Decisions
 
 ### 3.1 Scope and module layout
 
-The bootstrap library is small:
-
 | Module | Role |
 | --- | --- |
-| `Scott2013.GraphModel.Basic` | Pairing function and `pair-ne-zero` |
-
-Later modules will add Kleene star, application, abstraction, injectivity,
-and random variables.
+| `Scott2013.Prelude` | K-free prelude (no standard library) |
+| `Scott2013.GraphModel.Basic` | Pairing, `set(n)`, Kleene star |
+| `Scott2013.GraphModel.Application` | Application, $\lambda$, Theorems 3.1–3.6 |
+| `Scott2013.GraphModel.Combinators` | $K$, $S$, $\nabla$, RE, $\mathbb{S}$, Theorems 3.8–3.9 and 4.4 |
+| `Scott2013.GraphModel.Topology` | Theorems 3.10–3.12 |
+| `Scott2013.Probability` | Cantor space, Borel codes, cylinder measure |
+| `Scott2013.Stochastic` | Random variables, Theorems 4.2 and 4.5, fair-coin $\mathbb{T}$ |
 
 ### 3.2 Builtin naturals
 
@@ -129,18 +137,27 @@ flowchart TD
   App --> RV
 ```
 
-Solid arrows are planned dependencies. Only the pairing node is implemented.
+Solid arrows are implemented dependencies.
 
 ### 3.4 Verified theorem inventory
 
 | Paper result | Agda name | Status |
 | --- | --- | --- |
-| §2 pairing | `pair` / `pair-ne-zero` | Proved |
-| Theorem 3.1 | *(pending)* | Application is continuous |
-| Theorem 3.2 | *(pending)* | Largest graph of a continuous map |
-| Definition 3.3 / Theorems 3.4–3.8 | *(pending)* | Abstraction, lattice laws, least fixed point |
-| Theorems 3.10–3.12 | *(pending)* | $T_0$ embedding and injectivity of $\mathcal{P}(\mathbb{N})$ |
-| Theorems 4.2, 4.4, 4.5 | *(pending)* | Random application and languages |
+| §2 pairing | `pair` / `pair-ne-zero` / `unpair-pair` | Proved |
+| §2 star | `_∈*_` / `setₚ` / `members` | Proved |
+| Theorem 3.1 | `thm-3-1` | Proved |
+| Theorem 3.2 | `lam-app-fwd` / `lam-app-bwd` / `lam-largest` | Proved |
+| Definition 3.3 | `lam` | Proved |
+| Theorems 3.4–3.5 | `thm-3-4` / `thm-3-5` | Proved (3.5 one-way on composed apply) |
+| Theorem 3.6 | `thm-3-6-⊆/∩/∪` and reverses | Proved |
+| Theorem 3.8 | `thm-3-8-fp` / `thm-3-8-least` | Proved |
+| Definition 3.9 | `Succ` / `Pred` / `Test` / `re-interp-(0–4,app)` / `RE` | Proved (semantic interpreter; `RE = lfp RE-op`) |
+| Theorems 3.10–3.12 | `thm-3-10-*` / `Injectivity.thm-3-12-*` | Proved (countably based $T_0$ embedding; canonical extension) |
+| Definition 4.1 / Theorem 4.2 | `RandomVar` / `thm-4-2` | Proved (Cantor/Borel) |
+| Definition 4.3 | `𝕊-apply` / `𝕊-empty` / `𝕊-cons` / `𝕊` | Proved |
+| Theorem 4.4 | `RegularIn` / `regular-none` | Proved (former + empty language) |
+| §5 coins / cylinders | `μ-exp` / `coin-half` / `coin-indep` / `𝕋` | Proved |
+| Theorem 4.5 | `thm-4-5` / `ProbabilisticIn` | Proved (acceptance measurable; threshold well-defined) |
 
 ## 4. Verification and Automated Pipeline
 
@@ -163,9 +180,12 @@ model is listed as an author.
 
 ## 5. Discussion and Future Work
 
-Immediate work is to lock the numbered theorems rather than only the pairing
-encoding. The 1976 graph-model paper and the 2026 domain-valued
-random-variable development are related but remain separate repositories.
+The numbered theorems of the 2013 abstract are locked in the inventory
+above. Remaining mathematical slack is the paper's Lebesgue $[\![X=Y]\!]$
+event (not claimed constructively) and a full RE-graph continuity proof
+for the universal combinator beyond the semantic interpreter. The 1976
+graph-model paper and the 2026 domain-valued random-variable development
+are related but remain separate repositories.
 
 ## Code Availability and Archival
 

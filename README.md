@@ -34,9 +34,14 @@ and `sources/README.md`.
 
 ## Status
 
-**Bootstrap.** The library currently encodes Scott's pairing function and
-proves that pairs are nonzero. Numbered paper theorems are not yet
-formalized.
+The library is a `--safe --without-K` development of the 2013 abstract:
+Scott pairing and the graph model on `𝒫ℕ`, Theorems 3.1–3.8, the
+arithmetic combinators and semantic RE interpreter (Definition 3.9),
+the sequentializer (Definition 4.3), regular and probabilistic language
+formers (Theorems 4.4–4.5), the `T₀` embedding and injectivity of
+`𝒫ℕ` (Theorems 3.10–3.12), and random variables on Cantor space with
+cylinder measure (Definition 4.1, Theorem 4.2, §5 coins). There are no
+postulates. See `arxiv.md` §3.4 for the theorem inventory.
 
 ## Report and archival files
 

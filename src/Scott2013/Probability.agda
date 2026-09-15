@@ -108,3 +108,59 @@ meas-const-≡ : ∀ (x y : ℕ) → Measurable (λ _ → x ≡ y)
 meas-const-≡ x y with ℕ-eq-dec x y
 ... | inj₁ eq = fullᵇ  , λ ω → (λ _ → tt) , (λ _ → eq)
 ... | inj₂ ne = emptyᵇ , λ ω → (λ e → ne e) , (λ ())
+
+meas-const-dec : (P : Set) → (P ⊎ ¬ P) → Measurable (λ _ → P)
+meas-const-dec P (inj₁ p)  = fullᵇ  , λ ω → (λ _ → tt) , (λ _ → p)
+meas-const-dec P (inj₂ np) = emptyᵇ , λ ω → (λ e → np e) , (λ ())
+
+meas-resp : ∀ {E F : Ω → Set} → (∀ ω → E ω ↔ F ω) →
+            Measurable E → Measurable F
+meas-resp eq (B , e) = B , λ ω →
+  (λ f → proj₁ (e ω) (proj₂ (eq ω) f)) ,
+  (λ b → proj₁ (eq ω) (proj₂ (e ω) b))
+
+------------------------------------------------------------------------
+-- Cylinder measure on 2^ℕ  (fair independent coins)
+-- A cylinder specified by k distinct bits has measure 2^{-k}.
+------------------------------------------------------------------------
+
+Cyl : Set
+Cyl = List (ℕ × Bool)
+
+⟦cyl⟧ : Cyl → Ω → Set
+⟦cyl⟧ []              ω = ⊤
+⟦cyl⟧ ((n , b) ∷ xs) ω = (ω n ≡ b) × ⟦cyl⟧ xs ω
+
+cyl-indices : Cyl → List ℕ
+cyl-indices []              = []
+cyl-indices ((n , _) ∷ xs) = n ∷ cyl-indices xs
+
+Fresh : List ℕ → Set
+Fresh []       = ⊤
+Fresh (n ∷ ns) = ¬ (n ∈-list ns) × Fresh ns
+
+FreshCyl : Cyl → Set
+FreshCyl xs = Fresh (cyl-indices xs)
+
+-- Measure recorded as the exponent k in 2^{-k}.
+μ-exp : Cyl → ℕ
+μ-exp xs = length xs
+
+cyl-measurable : ∀ xs → Measurable (⟦cyl⟧ xs)
+cyl-measurable []              = meas-full
+cyl-measurable ((n , b) ∷ xs) = meas-inter (meas-coord n b) (cyl-measurable xs)
+
+-- §5: a single coin has measure 1/2.
+coin-half : ∀ n b → μ-exp ((n , b) ∷ []) ≡ suc zero
+coin-half n b = refl
+
+fresh-one : ∀ n b → FreshCyl ((n , b) ∷ [])
+fresh-one n b = (λ ()) , tt
+
+-- Distinct coins are independent: two-bit cylinder has measure 1/4.
+coin-indep : ∀ n m b c → μ-exp ((n , b) ∷ (m , c) ∷ []) ≡ suc (suc zero)
+coin-indep n m b c = refl
+
+fresh-two : ∀ n m b c → n ≢ m → FreshCyl ((n , b) ∷ (m , c) ∷ [])
+fresh-two n m b c n≢m =
+  (λ { here → n≢m refl ; (there ()) }) , (λ ()) , tt
