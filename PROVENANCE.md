@@ -34,7 +34,7 @@ arXiv under cs.LO and math.LO.
 The development lives in `src/Scott2013/`. There are no postulates. The
 library uses only Agda builtins (`Nat`, `Equality`, `Bool`, `Unit`) plus
 a local prelude. Numbered results of §§2–5 are recorded in `arxiv.md`
-§3.4.  The paper's literal `[0,1]` claims are proved relative to the
+§3.5.  The paper's literal `[0,1]` claims are proved relative to the
 explicit classical laws in `LebesgueUnitInterval`; this does not claim a
 constructive implementation of classical reals.  Cantor space `ℕ → Bool`
 with Borel codes and cylinder measure is retained as a separate,

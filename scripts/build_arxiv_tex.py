@@ -311,6 +311,7 @@ def break_texttt_paths(latex: str) -> str:
     def fix(match: re.Match[str]) -> str:
         inner = match.group(1)
         inner = inner.replace("/", "/\\allowbreak{}")
+        inner = inner.replace("-", "-\\allowbreak{}")
         inner = inner.replace(r"\_", r"\_\allowbreak{}")
         inner = re.sub(r"(?<=[a-z])(?=[A-Z])", r"\\allowbreak{}", inner)
         inner = re.sub(r"(?<=[A-Z])(?=[A-Z][a-z])", r"\\allowbreak{}", inner)

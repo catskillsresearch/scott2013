@@ -11,12 +11,44 @@ GITHUB = "https://github.com/catskillsresearch/scott2013"
 
 FILES = [
     "src/Scott2013.agda",
+    "src/Scott2013/Prelude.agda",
     "src/Scott2013/GraphModel/Basic.agda",
+    "src/Scott2013/GraphModel/Application.agda",
+    "src/Scott2013/GraphModel/Combinators.agda",
+    "src/Scott2013/Computability/RE.agda",
+    "src/Scott2013/GraphModel/Arithmetic.agda",
+    "src/Scott2013/GraphModel/UniversalRE.agda",
+    "src/Scott2013/GraphModel/Sequentializer.agda",
+    "src/Scott2013/GraphModel/Topology.agda",
+    "src/Scott2013/Automata/Finite.agda",
+    "src/Scott2013/Automata/ScottEncoding.agda",
+    "src/Scott2013/MeasureTheory/Base.agda",
+    "src/Scott2013/MeasureTheory/Lebesgue.agda",
+    "src/Scott2013/Stochastic/Lebesgue.agda",
+    "src/Scott2013/Stochastic/LebesgueTheorems.agda",
+    "src/Scott2013/Probability.agda",
+    "src/Scott2013/Stochastic.agda",
 ]
 
 FILE_ROLES: dict[str, str] = {
     "src/Scott2013.agda": "Root import graph",
+    "src/Scott2013/Prelude.agda": "K-free local prelude",
     "src/Scott2013/GraphModel/Basic.agda": "Scott pairing and graph-model encodings",
+    "src/Scott2013/GraphModel/Application.agda": "Application, continuity, and λ-abstraction",
+    "src/Scott2013/GraphModel/Combinators.agda": "Core combinators and fixed-point encodings",
+    "src/Scott2013/Computability/RE.agda": "Semidecision and recursively enumerable closure layer",
+    "src/Scott2013/GraphModel/Arithmetic.agda": "Arithmetic combinator correctness",
+    "src/Scott2013/GraphModel/UniversalRE.agda": "Universal RE graph laws and r.e. witness",
+    "src/Scott2013/GraphModel/Sequentializer.agda": "Sequentializer graph laws and r.e. witness",
+    "src/Scott2013/GraphModel/Topology.agda": "Universality and injectivity of the graph model",
+    "src/Scott2013/Automata/Finite.agda": "Independent finite deterministic automata",
+    "src/Scott2013/Automata/ScottEncoding.agda": "DFA/Scott translations and Theorem 4.4",
+    "src/Scott2013/MeasureTheory/Base.agda": "Abstract measurable spaces and probability measures",
+    "src/Scott2013/MeasureTheory/Lebesgue.agda": "Relative literal unit-interval interface",
+    "src/Scott2013/Stochastic/Lebesgue.agda": "Literal random variables and equality events",
+    "src/Scott2013/Stochastic/LebesgueTheorems.agda": "Theorem 4.5 and fair independent oracle",
+    "src/Scott2013/Probability.agda": "Constructive Cantor/Borel alternative model",
+    "src/Scott2013/Stochastic.agda": "Stochastic application in the Cantor model",
 }
 
 

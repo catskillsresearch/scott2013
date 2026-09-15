@@ -40,7 +40,7 @@ sequentializer, an independent finite-automata definition with both
 directions of Theorem 4.4, and literal `[0,1]` results relative to an
 explicit `LebesgueUnitInterval` structure.  The constructive Cantor-space
 model remains available as a separate alternative.  There are no
-postulates.  See the source-to-declaration ledger in `arxiv.md` §3.4.
+postulates.  See the source-to-declaration ledger in `arxiv.md` §3.6.
 
 ## Report and archival files
 
