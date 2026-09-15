@@ -82,6 +82,76 @@ s-op Z Y X = (Z · X) · (Y · X)
 S-graph : ∀ k → S k ↔ lam (λ Z → lam (λ Y → lam (λ X → s-op Z Y X))) k
 S-graph k = (λ p → p) , (λ p → p)
 
+-- Unfold λ three times: S applies as Z(X)(Y(X)).
+lam-ne : ∀ (Φ : 𝒫ℕ → 𝒫ℕ) n k → lam Φ (pair n k) → Φ (setₚ n) k
+lam-ne Φ n k (inj₁ peq) = ⊥-elim (pair-ne-zero n k peq)
+lam-ne Φ n k (inj₂ (n′ , m′ , peq , Φn)) =
+  subst (λ m″ → Φ (setₚ n) m″) (sym (proj₂ inj))
+    (subst (λ n″ → Φ (setₚ n″) m′) (sym (proj₁ inj)) Φn)
+  where
+    inj = pair-injective n k n′ m′ peq
+
+S-correct-fwd : ∀ Z Y X m → (((S · Z) · Y) · X) m → s-op Z Y X m
+S-correct-fwd Z Y X m (nX , nX∈ , nY , nY∈ , nZ , nZ∈ , Snm) =
+  lift (lam-ne (λ X′ → s-op (setₚ nZ) (setₚ nY) X′) nX m
+    (lam-ne (λ Y′ → lam (λ X′ → s-op (setₚ nZ) Y′ X′)) nY (pair nX m)
+      (lam-ne (λ Z′ → lam₂ (s-op Z′)) nZ (pair nY (pair nX m)) Snm)))
+  where
+    lift : s-op (setₚ nZ) (setₚ nY) (setₚ nX) m → s-op Z Y X m
+    lift (j , j∈ , n , n∈ , Zn) =
+      j
+      , All-mono (members j)
+          (λ x x∈ →
+            let (i , i∈ , Yi) = ∈*-∀ j (setₚ nY · setₚ nX) j∈ x x∈
+            in  i
+              , All-mono (members i) (λ y y∈ → ∈*-to-⊆ nX nX∈ y∈) i∈
+              , ∈*-∀ nY Y nY∈ (pair i x) Yi)
+          (∈*-refl j)
+      , n
+      , All-mono (members n) (λ y y∈ → ∈*-to-⊆ nX nX∈ y∈) n∈
+      , ∈*-∀ nZ Z nZ∈ (pair n (pair j m)) Zn
+
+S-correct-bwd : ∀ Z Y X m → s-op Z Y X m → (((S · Z) · Y) · X) m
+S-correct-bwd Z Y X m (j , j∈YX , n , n∈X , Zn) =
+  nX , nX∈*X , nY , nY∈*Y , nZ , nZ∈*Z
+  , inj₂ (nZ , pair nY (pair nX m) , refl
+  , inj₂ (nY , pair nX m , refl
+  , inj₂ (nX , m , refl , finite)))
+  where
+    apR = ∈*-app-approx j Y X j∈YX
+    nY  = proj₁ apR
+    nX2 = proj₁ (proj₂ apR)
+    nY∈*Y = proj₁ (proj₂ (proj₂ apR))
+    nX2∈  = proj₁ (proj₂ (proj₂ (proj₂ apR)))
+    j⊆    = proj₂ (proj₂ (proj₂ (proj₂ apR)))
+    nZ  = singleton-seq (pair n (pair j m))
+    nX  = seq-append n nX2
+    nX∈*X = ∈*-append n nX2 n∈X nX2∈
+    nZ∈*Z : nZ ∈* Z
+    nZ∈*Z = subst (All Z) (sym (members-singleton (pair n (pair j m)))) (Zn , tt)
+
+    finite : s-op (setₚ nZ) (setₚ nY) (setₚ nX) m
+    finite = j , j∈fin , n , n∈fin , Zn-fin
+      where
+        j∈fin : j ∈* (setₚ nY · setₚ nX)
+        j∈fin = All-mono (members j)
+          (λ x x∈ →
+            let gx = ∈*-∀ j (setₚ nY · setₚ nX2) j⊆ x x∈
+            in  proj₁ gx
+              , All-mono (members (proj₁ gx))
+                  (λ y y∈ → set-append-right n nX2 y∈)
+                  (proj₁ (proj₂ gx))
+              , proj₂ (proj₂ gx))
+          (∈*-refl j)
+
+        n∈fin : n ∈* setₚ nX
+        n∈fin = All-mono (members n)
+          (λ y y∈ → set-append-left n nX2 y∈) (∈*-refl n)
+
+        Zn-fin : setₚ nZ (pair n (pair j m))
+        Zn-fin = subst (pair n (pair j m) ∈-list_)
+          (sym (members-singleton (pair n (pair j m)))) here
+
 ------------------------------------------------------------------------
 -- Definition 3.9: arithmetic combinators as operators, then as graphs
 ------------------------------------------------------------------------
@@ -276,6 +346,17 @@ run F (n ∷ ns) Q = (F · singleton n) · run F ns Q
 𝕊 : 𝒫ℕ
 𝕊 = lam (λ F → lam (λ S → lam (𝕊-on F S)))
 
+-- 𝕊(F)({σ})(Q) is the semantic sequentializer (Definition 4.3).
+𝕊-on-sing : ∀ F σ Q m → 𝕊-on F (singleton σ) Q m ↔ 𝕊-apply F σ Q m
+𝕊-on-sing F σ Q m =
+  (λ (σ′ , eq , p) → subst (λ s → 𝕊-apply F s Q m) eq p)
+  , (λ p → σ , refl , p)
+
+𝕊-on-empty : ∀ F Q m → 𝕊-on F (singleton zero) Q m ↔ Q m
+𝕊-on-empty F Q m =
+  (λ p → proj₁ (𝕊-empty F Q m) (proj₁ (𝕊-on-sing F zero Q m) p))
+  , (λ p → proj₂ (𝕊-on-sing F zero Q m) (proj₂ (𝕊-empty F Q m) p))
+
 ------------------------------------------------------------------------
 -- Theorem 4.4: regular languages in the model
 ------------------------------------------------------------------------
@@ -298,3 +379,35 @@ regular-none Alph finAlph =
     empty-run : ∀ xs → run (setₚ zero) xs (setₚ zero) zero → ⊥
     empty-run [] ()
     empty-run (x ∷ xs) (n , n∈ , k , k∈ , ())
+
+-- The empty-word language {0} is regular: accept only the empty
+-- sequence, with empty transitions and start/accept set {0}.
+regular-empty-word : ∀ (Alph : 𝒫ℕ) → Finite Alph →
+                     RegularIn Alph (λ σ → σ ≡ zero)
+regular-empty-word Alph finAlph =
+  finAlph
+  , zero
+  , singleton-seq zero
+  , λ σ → fwd σ , bwd σ
+  where
+    Q0 : setₚ (singleton-seq zero) zero
+    Q0 = subst (zero ∈-list_) (sym (members-singleton zero)) here
+
+    empty-cons : ∀ x xs →
+      run (setₚ zero) (x ∷ xs) (setₚ (singleton-seq zero)) zero → ⊥
+    empty-cons x xs (n , n∈ , k , k∈ , ())
+
+    fwd : ∀ σ → σ ≡ zero →
+          (σ ∈* Alph) × 𝕊-apply (setₚ zero) σ (setₚ (singleton-seq zero)) zero
+    fwd .zero refl = tt , Q0
+
+    bwd : ∀ σ →
+          (σ ∈* Alph) × 𝕊-apply (setₚ zero) σ (setₚ (singleton-seq zero)) zero →
+          σ ≡ zero
+    bwd zero    _ = refl
+    bwd (suc σ) (_ , run0) =
+      ⊥-elim (empty-cons (proj₂ (unpair (suc σ)))
+                         (members (proj₁ (unpair (suc σ))))
+        (subst (λ xs → run (setₚ zero) xs (setₚ (singleton-seq zero)) zero)
+               (members-unfold-suc σ) run0))
+

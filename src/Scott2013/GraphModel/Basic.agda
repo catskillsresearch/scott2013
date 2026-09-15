@@ -439,6 +439,19 @@ members-seq-append n m = go n (<-wf n)
           (trans (cong (x ∷_) (go ns pns))
                  (cong (_++ members m) (sym (members-unfold-suc k))))
 
+∈*-to-⊆ : ∀ k {X} → k ∈* X → setₚ k ⊆ X
+∈*-to-⊆ k p {x} x∈ = ∈*-∀ k _ p x x∈
+
+set-append-left : ∀ n m {x} → x ∈-set n → x ∈-set (seq-append n m)
+set-append-left n m {x} p =
+  subst (x ∈-list_) (sym (members-seq-append n m))
+    (∈-++-left (members n) (members m) p)
+
+set-append-right : ∀ n m {x} → x ∈-set m → x ∈-set (seq-append n m)
+set-append-right n m {x} p =
+  subst (x ∈-list_) (sym (members-seq-append n m))
+    (∈-++-right (members n) (members m) p)
+
 ∈*-append : ∀ {X} n m → n ∈* X → m ∈* X → seq-append n m ∈* X
 ∈*-append {X} n m n∈ m∈ =
   subst (All X) (sym (members-seq-append n m))

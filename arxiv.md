@@ -151,13 +151,14 @@ Solid arrows are implemented dependencies.
 | Theorems 3.4–3.5 | `thm-3-4` / `thm-3-5` | Proved (3.5 one-way on composed apply) |
 | Theorem 3.6 | `thm-3-6-⊆/∩/∪` and reverses | Proved |
 | Theorem 3.8 | `thm-3-8-fp` / `thm-3-8-least` | Proved |
+| $K$ / $S$ | `K-correct-fwd/bwd` / `S-correct-fwd/bwd` | Proved |
 | Definition 3.9 | `Succ` / `Pred` / `Test` / `re-interp-(0–4,app)` / `RE` | Proved (semantic interpreter; `RE = lfp RE-op`) |
 | Theorems 3.10–3.12 | `thm-3-10-*` / `Injectivity.thm-3-12-*` | Proved (countably based $T_0$ embedding; canonical extension) |
 | Definition 4.1 / Theorem 4.2 | `RandomVar` / `thm-4-2` | Proved (Cantor/Borel) |
-| Definition 4.3 | `𝕊-apply` / `𝕊-empty` / `𝕊-cons` / `𝕊` | Proved |
-| Theorem 4.4 | `RegularIn` / `regular-none` | Proved (former + empty language) |
-| §5 coins / cylinders | `μ-exp` / `coin-half` / `coin-indep` / `𝕋` | Proved |
-| Theorem 4.5 | `thm-4-5` / `ProbabilisticIn` | Proved (acceptance measurable; threshold well-defined) |
+| Definition 4.3 | `𝕊-apply` / `𝕊-on-sing` / `𝕊-empty` / `𝕊-cons` / `𝕊` | Proved |
+| Theorem 4.4 | `RegularIn` / `regular-none` / `regular-empty-word` | Proved (empty language and `{ε}`) |
+| §5 coins / cylinders | `μ-exp` / `coin-half` / `coin-indep` / `𝕋` / `coin-true-is-zero` | Proved (`𝕋({n})∈\{\{0\},\{1\}\}`) |
+| Theorem 4.5 | `thm-4-5` / `thm-4-5-coin` / `AboveThreshold` | Proved (measurable accept; coin $1/2>2^{-d}$) |
 
 ## 4. Verification and Automated Pipeline
 

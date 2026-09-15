@@ -144,6 +144,55 @@ coin-indep-event : ∀ n m → n ≢ m →
   μ-exp ((n , true) ∷ (m , true) ∷ []) ≡ suc (suc zero)
 coin-indep-event n m _ = coin-indep n m true true
 
+-- 𝕋({n}) ∈ {{0},{1}}: the n-th coin is a singleton bit.
+coin-apply-one-fwd : ∀ ω n → ω n ≡ false → (coin-pred ω · singleton n) (suc zero)
+coin-apply-one-fwd ω n eq =
+  singleton-seq n
+  , subst (All (singleton n)) (sym (members-singleton n)) (refl , tt)
+  , coin-false ω n eq
+
+coin-true-is-zero : ∀ ω n → ω n ≡ true →
+                    ∀ m → (coin-pred ω · singleton n) m → m ≡ zero
+coin-true-is-zero ω n ωt m (k , k∈ , c) with c
+... | n′ , inj₁ (_ , peq) = proj₂ (pair-injective k m (singleton-seq n′) zero peq)
+... | n′ , inj₂ (ωf , peq) =
+  ⊥-elim (true≢false (trans (sym ωt) (subst (λ n″ → ω n″ ≡ false) n′≡n ωf)))
+  where
+    inj = pair-injective k m (singleton-seq n′) (suc zero) peq
+    k≡⟨n′⟩ = proj₁ inj
+    n′∈k : n′ ∈-set k
+    n′∈k = subst (n′ ∈-list_) (sym (trans (cong members k≡⟨n′⟩) (members-singleton n′))) here
+    n′≡n : n′ ≡ n
+    n′≡n = ∈*-∀ k (singleton n) k∈ n′ n′∈k
+
+coin-false-is-one : ∀ ω n → ω n ≡ false →
+                    ∀ m → (coin-pred ω · singleton n) m → m ≡ suc zero
+coin-false-is-one ω n ωf m (k , k∈ , c) with c
+... | n′ , inj₂ (_ , peq) = proj₂ (pair-injective k m (singleton-seq n′) (suc zero) peq)
+... | n′ , inj₁ (ωt , peq) =
+  ⊥-elim (true≢false (trans (sym (subst (λ n″ → ω n″ ≡ true) n′≡n ωt)) ωf))
+  where
+    inj = pair-injective k m (singleton-seq n′) zero peq
+    k≡⟨n′⟩ = proj₁ inj
+    n′∈k : n′ ∈-set k
+    n′∈k = subst (n′ ∈-list_) (sym (trans (cong members k≡⟨n′⟩) (members-singleton n′))) here
+    n′≡n : n′ ≡ n
+    n′≡n = ∈*-∀ k (singleton n) k∈ n′ n′∈k
+
+-- Threshold language: acceptance contains a fresh k-cylinder with 2^{-k} > 2^{-d}.
+AboveThreshold : (Ω → Set) → ℕ → Set
+AboveThreshold E d =
+  Σ Cyl (λ xs → FreshCyl xs × (μ-exp xs < d) × (∀ ω → ⟦cyl⟧ xs ω → E ω))
+
+-- Coin: P(0 ∈ 𝕋({n})) = 1/2 > 2^{-d} whenever d ≥ 2.
+thm-4-5-coin : ∀ n d → suc zero < d →
+               AboveThreshold (λ ω → (coin-pred ω · singleton n) zero) d
+thm-4-5-coin n d 1<d =
+  ((n , true) ∷ [])
+  , fresh-one n true
+  , 1<d
+  , λ ω cyl → coin-apply-fwd ω n (proj₁ cyl)
+
 ------------------------------------------------------------------------
 -- Sequentializer on random variables; Theorem 4.5
 ------------------------------------------------------------------------

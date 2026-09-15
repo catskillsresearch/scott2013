@@ -269,3 +269,107 @@ thm-3-6-∪-rev F G {suc k} (inj₂ (inj₁ ()))
 thm-3-6-∪-rev F G {suc k} (inj₁ (inj₂ (n , m , peq , Fn))) = inj₂ (n , m , peq , inj₁ Fn)
 thm-3-6-∪-rev F G {suc k} (inj₂ (inj₂ (n , m , peq , Gn))) = inj₂ (n , m , peq , inj₂ Gn)
 
+------------------------------------------------------------------------
+-- Continuity helpers for S and the sequentializer
+------------------------------------------------------------------------
+
+·-left-cont : ∀ X → Continuous₁ (λ F → F · X)
+·-left-cont X F m = fwd , bwd
+  where
+    fwd : (F · X) m → Σ ℕ (λ k → (k ∈* F) × (setₚ k · X) m)
+    fwd (n , n∈X , Fn) =
+      singleton-seq (pair n m)
+      , subst (All F) (sym (members-singleton (pair n m))) (Fn , tt)
+      , n , n∈X
+      , subst (pair n m ∈-list_) (sym (members-singleton (pair n m))) here
+
+    bwd : Σ ℕ (λ k → (k ∈* F) × (setₚ k · X) m) → (F · X) m
+    bwd (k , k∈F , n , n∈X , pair∈) =
+      n , n∈X , ∈*-∀ k F k∈F (pair n m) pair∈
+
+∈*-cont : ∀ (Φ : 𝒫ℕ → 𝒫ℕ) → Continuous₁ Φ → ∀ k X →
+          k ∈* Φ X → Σ ℕ (λ kX → (kX ∈* X) × k ∈* Φ (setₚ kX))
+∈*-cont Φ Φc k X p = go (members k) p
+  where
+    go : ∀ xs → All (Φ X) xs →
+         Σ ℕ (λ kX → (kX ∈* X) × All (Φ (setₚ kX)) xs)
+    go []       _            = zero , tt , tt
+    go (m ∷ ms) (ΦXm , rest) with proj₁ (Φc X m) ΦXm | go ms rest
+    ... | k1 , k1∈ , Φs | k2 , k2∈ , Φrest =
+      seq-append k1 k2
+      , ∈*-append k1 k2 k1∈ k2∈
+      , proj₂ (Φc (setₚ (seq-append k1 k2)) m)
+          (k1 , k1∈app , Φs)
+      , All-mono ms
+          (λ x Φx → proj₂ (Φc (setₚ (seq-append k1 k2)) x)
+            (k2 , k2∈app , Φx))
+          Φrest
+      where
+        k1∈app : k1 ∈* setₚ (seq-append k1 k2)
+        k1∈app = All-mono (members k1)
+          (λ x x∈ → set-append-left k1 k2 x∈) (∈*-refl k1)
+
+        k2∈app : k2 ∈* setₚ (seq-append k1 k2)
+        k2∈app = All-mono (members k2)
+          (λ x x∈ → set-append-right k1 k2 x∈) (∈*-refl k2)
+
+∈*-app-approx : ∀ k F X → k ∈* (F · X) →
+                Σ ℕ (λ kF → Σ ℕ (λ kX →
+                  (kF ∈* F) × (kX ∈* X) × k ∈* (setₚ kF · setₚ kX)))
+∈*-app-approx k F X p = go (members k) p
+  where
+    go : ∀ xs → All (F · X) xs →
+         Σ ℕ (λ kF → Σ ℕ (λ kX →
+           (kF ∈* F) × (kX ∈* X) × All (setₚ kF · setₚ kX) xs))
+    go []       _ = zero , zero , tt , tt , tt
+    go (m ∷ ms) ((n , n∈X , Fn) , rest) with go ms rest
+    ... | kF2 , kX2 , kF2∈ , kX2∈ , ih =
+      seq-append kF1 kF2
+      , seq-append n kX2
+      , ∈*-append kF1 kF2 kF1∈F kF2∈
+      , ∈*-append n kX2 n∈X kX2∈
+      , (n , n∈kX , pair∈kF)
+      , All-mono ms lift ih
+      where
+        kF1 : ℕ
+        kF1 = singleton-seq (pair n m)
+
+        kF1∈F : kF1 ∈* F
+        kF1∈F = subst (All F) (sym (members-singleton (pair n m))) (Fn , tt)
+
+        n∈kX : n ∈* setₚ (seq-append n kX2)
+        n∈kX = All-mono (members n)
+          (λ x x∈ → set-append-left n kX2 x∈) (∈*-refl n)
+
+        pair∈kF : pair n m ∈-set (seq-append kF1 kF2)
+        pair∈kF = set-append-left kF1 kF2
+          (subst (pair n m ∈-list_) (sym (members-singleton (pair n m))) here)
+
+        lift : ∀ x → (setₚ kF2 · setₚ kX2) x →
+               (setₚ (seq-append kF1 kF2) · setₚ (seq-append n kX2)) x
+        lift x (j , j∈ , pair∈) =
+          j
+          , All-mono (members j)
+              (λ y y∈ → set-append-right n kX2 y∈) j∈
+          , set-append-right kF1 kF2 pair∈
+
+-- Composition: X ↦ Φ(X) · B is continuous when Φ is.
+app-comp-right : ∀ (Φ : 𝒫ℕ → 𝒫ℕ) (B : 𝒫ℕ) → Continuous₁ Φ →
+                 Continuous₁ (λ X → Φ X · B)
+app-comp-right Φ B Φc X m = fwd , bwd
+  where
+    fwd : (Φ X · B) m → Σ ℕ (λ k → (k ∈* X) × (Φ (setₚ k) · B) m)
+    fwd p with proj₁ (·-left-cont B (Φ X) m) p
+    ... | kF , kF∈Φ , setB =
+      let (kX , kX∈ , kF∈Φs) = ∈*-cont Φ Φc kF X kF∈Φ
+      in  kX , kX∈
+        , proj₂ (·-left-cont B (Φ (setₚ kX)) m) (kF , kF∈Φs , setB)
+
+    bwd : Σ ℕ (λ k → (k ∈* X) × (Φ (setₚ k) · B) m) → (Φ X · B) m
+    bwd (k , k∈ , n , n∈B , Φkn) =
+      n , n∈B
+      , proj₂ (Φc X (pair n m))
+          (k
+          , All-mono (members k) (λ x x∈ → ∈*-to-⊆ k k∈ x∈) (∈*-refl k)
+          , Φkn)
+
