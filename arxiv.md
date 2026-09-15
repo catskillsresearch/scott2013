@@ -90,12 +90,14 @@ the least-fixed-point combinator $\nabla=\lambda X.\Phi(X(X))$.
 ### 2.3 Random variables
 
 Scott takes $X:[0,1]\to\mathcal{P}(\mathbb{N})$ with Lebesgue-measurable
-coordinate events (Definition 4.1). This formalization uses Cantor space
-$\Omega=\mathbb{N}\to\mathrm{Bool}$ with Borel codes and cylinder measure
-$2^{-k}$ on $k$-bit assignments, which the paper explicitly allows.
-Theorem 4.2 closes random variables under pointwise application.
-Theorems 4.4 and 4.5 recover regular and probabilistic languages from the
-sequentializer. The event $[\![X=Y]\!]$ is not claimed constructively.
+coordinate events (Definition 4.1).  The literal development quantifies
+over `LebesgueUnitInterval`, an explicit structure containing the
+classical unit interval, its measurable events and Lebesgue laws, and a
+chosen binary expansion.  This is a safe relative formalization, not a
+constructive existence claim for that classical structure.  The separate
+Cantor-space implementation remains an unconditional alternative model.
+Theorem 4.2 and the measurability of $[\![X=Y]\!]$ are proved in the
+literal interface.
 
 ## 3. Agda Architecture and Design Decisions
 
@@ -106,10 +108,19 @@ sequentializer. The event $[\![X=Y]\!]$ is not claimed constructively.
 | `Scott2013.Prelude` | K-free prelude (no standard library) |
 | `Scott2013.GraphModel.Basic` | Pairing, `set(n)`, Kleene star |
 | `Scott2013.GraphModel.Application` | Application, $\lambda$, Theorems 3.1–3.6 |
-| `Scott2013.GraphModel.Combinators` | $K$, $S$, $\nabla$, RE, $\mathbb{S}$, Theorems 3.8–3.9 and 4.4 |
+| `Scott2013.Computability.RE` | Fuel-indexed semidecision and r.e. closure laws |
+| `Scott2013.GraphModel.Combinators` | $K$, $S$, $\nabla$, and core encodings |
+| `Scott2013.GraphModel.Arithmetic` | Application correctness of `Succ`, `Pred`, and `Test` |
+| `Scott2013.GraphModel.UniversalRE` | Computable `RE` and graph equations (i)–(vi) |
+| `Scott2013.GraphModel.Sequentializer` | Graph recurrences and r.e. witness for $\mathbb S$ |
+| `Scott2013.Automata.Finite` | Independent standard finite automata and words |
+| `Scott2013.Automata.ScottEncoding` | Both translations and exact Theorem 4.4 |
 | `Scott2013.GraphModel.Topology` | Theorems 3.10–3.12 |
+| `Scott2013.MeasureTheory.Base` | Generic measurable spaces and probability measures |
+| `Scott2013.MeasureTheory.Lebesgue` | Safe relative literal $[0,1]$/Lebesgue interface |
+| `Scott2013.Stochastic.Lebesgue*` | Literal Theorems 4.2, 4.5, equality events, and fair oracle |
 | `Scott2013.Probability` | Cantor space, Borel codes, cylinder measure |
-| `Scott2013.Stochastic` | Random variables, Theorems 4.2 and 4.5, fair-coin $\mathbb{T}$ |
+| `Scott2013.Stochastic` | Optional constructive Cantor random variables |
 
 ### 3.2 Builtin naturals
 
@@ -139,26 +150,37 @@ flowchart TD
 
 Solid arrows are implemented dependencies.
 
-### 3.4 Verified theorem inventory
+### 3.4 Source-to-declaration ledger
 
-| Paper result | Agda name | Status |
+The status column is deliberately strict: **exact** means the Agda
+statement has the same mathematical force as the paper; **partial** means
+that only a semantic surrogate, one implication, or examples are checked.
+
+| Paper obligation | Agda endpoint | Exact status |
 | --- | --- | --- |
-| §2 pairing | `pair` / `pair-ne-zero` / `unpair-pair` | Proved |
-| §2 star | `_∈*_` / `setₚ` / `members` | Proved |
-| Theorem 3.1 | `thm-3-1` | Proved |
-| Theorem 3.2 | `lam-app-fwd` / `lam-app-bwd` / `lam-largest` | Proved |
-| Definition 3.3 | `lam` | Proved |
-| Theorems 3.4–3.5 | `thm-3-4` / `thm-3-5` | Proved (3.5 one-way on composed apply) |
-| Theorem 3.6 | `thm-3-6-⊆/∩/∪` and reverses | Proved |
-| Theorem 3.8 | `thm-3-8-fp` / `thm-3-8-least` | Proved |
-| $K$ / $S$ | `K-correct-fwd/bwd` / `S-correct-fwd/bwd` | Proved |
-| Definition 3.9 | `Succ` / `Pred` / `Test` / `re-interp-(0–4,app)` / `RE` | Proved (semantic interpreter; `RE = lfp RE-op`) |
-| Theorems 3.10–3.12 | `thm-3-10-*` / `Injectivity.thm-3-12-*` | Proved (countably based $T_0$ embedding; canonical extension) |
-| Definition 4.1 / Theorem 4.2 | `RandomVar` / `thm-4-2` | Proved (Cantor/Borel) |
-| Definition 4.3 | `𝕊-apply` / `𝕊-on-sing` / `𝕊-empty` / `𝕊-cons` / `𝕊` | Proved |
-| Theorem 4.4 | `RegularIn` / `regular-none` / `regular-empty-word` | Proved (empty language and `{ε}`) |
-| §5 coins / cylinders | `μ-exp` / `coin-half` / `coin-indep` / `𝕋` / `coin-true-is-zero` | Proved (`𝕋({n})∈\{\{0\},\{1\}\}`) |
-| Theorem 4.5 | `thm-4-5` / `thm-4-5-coin` / `AboveThreshold` | Proved (measurable accept; coin $1/2>2^{-d}$) |
+| §2 pairing, sequences, $\mathrm{set}(n)$, star | `pair`, `unpair-pair`, `members`, `setₚ`, `_∈*_` | Exact |
+| Definition 2.1 | `_·_` | Exact |
+| Definition 2.2 | `Continuous₁`, `Continuous₂` | Exact for one and two arguments |
+| Theorem 3.1 | `thm-3-1` | Exact |
+| Theorem 3.2 | `lam-app-fwd`, `lam-app-bwd`, `lam-largest` | Exact |
+| Definition 3.3 | `lam` | Exact |
+| Theorem 3.4 / Corollary 3.5 | `thm-3-4`, `thm-3-5-*`, `∘ₒ-correct` | Exact for the arities and composition used in the paper |
+| Theorem 3.6 | `thm-3-6-⊆/∩/∪` and reverses | Exact |
+| Definition 3.7 | `Semi`, `RESet`, `Computable₁`, `Computable₂` | Exact |
+| Theorem 3.8, least fixed point | `thm-3-8-fp`, `thm-3-8-least` | Exact order-theoretic clause |
+| Theorem 3.8, computability | `thm-3-8-computable` | Exact |
+| $I,K,S$ application | `I-correct-*`, `K-correct-*`, `S-correct-*` | Exact |
+| Definition 3.9 arithmetic | `Succ-correct`, `Pred-correct`, `Test-correct` | Exact |
+| Definition 3.9 universal $\mathrm{RE}$ | `RE-i`–`RE-vi`, `RE-op-computable`, `RE-re` | Exact |
+| Theorem 3.10 | `thm-3-10-*` | Exact relative to the explicit countable-basis presentation |
+| Definition 3.11 / Theorem 3.12 | `Injectivity.thm-3-12-*` | Exact relative to the paper's open-extension data |
+| Definition 4.1 | `Relative.RandomVar` | Exact relative to `LebesgueUnitInterval`; Cantor model separate |
+| Theorem 4.2 | `Relative.thm-4-2` | Exact |
+| Equality-event paragraph after 4.2 | `⟦_≈_⟧`, `equality-event-measurable`, `equality-probability` | Exact |
+| Definition 4.3 | `𝕊-graph-run`, `𝕊-rec-empty`, `𝕊-rec-cons`, `𝕊-re` | Exact |
+| Theorem 4.4 | `StandardRegular`, `thm-4-4` | Exact bidirectional theorem |
+| Theorem 4.5 | `Theorem45Hypotheses`, `GraphAcceptEvent`, `thm-4-5` | Exact relative Lebesgue statement |
+| §5 fair oracle | `𝕋`, `coin-dichotomy`, `coin-half`, `coins-joint-independent` | Exact relative to `LebesgueUnitInterval` |
 
 ## 4. Verification and Automated Pipeline
 
@@ -181,12 +203,11 @@ model is listed as an author.
 
 ## 5. Discussion and Future Work
 
-The numbered theorems of the 2013 abstract are locked in the inventory
-above. Remaining mathematical slack is the paper's Lebesgue $[\![X=Y]\!]$
-event (not claimed constructively) and a full RE-graph continuity proof
-for the universal combinator beyond the semantic interpreter. The 1976
-graph-model paper and the 2026 domain-valued random-variable development
-are related but remain separate repositories.
+The ledger now has a checked endpoint for each definition, theorem, and
+substantive claim in §§2–5.  Classical Lebesgue mathematics is explicitly
+relative to `LebesgueUnitInterval`; the constructive Cantor model remains
+available separately.  The 1976 graph-model paper and the 2026
+domain-valued random-variable development remain separate repositories.
 
 ## Code Availability and Archival
 

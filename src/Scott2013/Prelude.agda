@@ -289,6 +289,54 @@ length : {A : Set} → List A → ℕ
 length []       = zero
 length (_ ∷ xs) = suc (length xs)
 
+map : {A B : Set} → (A → B) → List A → List B
+map f []       = []
+map f (x ∷ xs) = f x ∷ map f xs
+
+concat : {A : Set} → List (List A) → List A
+concat []         = []
+concat (xs ∷ xss) = xs ++ concat xss
+
+concatMap : {A B : Set} → (A → List B) → List A → List B
+concatMap f xs = concat (map f xs)
+
+map-id : {A : Set} → ∀ (xs : List A) → map (λ x → x) xs ≡ xs
+map-id []       = refl
+map-id (x ∷ xs) = cong (x ∷_) (map-id xs)
+
+map-compose : {A B C : Set} (f : B → C) (g : A → B) →
+              ∀ xs → map f (map g xs) ≡ map (λ x → f (g x)) xs
+map-compose f g []       = refl
+map-compose f g (x ∷ xs) = cong (f (g x) ∷_) (map-compose f g xs)
+
+map-∈ : {A B : Set} (f : A → B) {x : A} (xs : List A) →
+        x ∈-list xs → f x ∈-list map f xs
+map-∈ f (x ∷ xs) here      = here
+map-∈ f (y ∷ xs) (there p) = there (map-∈ f xs p)
+
+map-∈-split : {A B : Set} (f : A → B) {y : B} (xs : List A) →
+              y ∈-list map f xs → Σ A (λ x → (x ∈-list xs) × (f x ≡ y))
+map-∈-split f (x ∷ xs) here = x , here , refl
+map-∈-split f (x ∷ xs) (there p) with map-∈-split f xs p
+... | y , y∈ , eq = y , there y∈ , eq
+
+∈-concatMap : {A B : Set} (f : A → List B) {y : B} (xs : List A) →
+  y ∈-list concatMap f xs →
+  Σ A (λ x → (x ∈-list xs) × (y ∈-list f x))
+∈-concatMap f [] ()
+∈-concatMap f (x ∷ xs) p with ∈-++-split (f x) (concatMap f xs) p
+... | inj₁ q = x , here , q
+... | inj₂ q with ∈-concatMap f xs q
+...   | y , y∈ , r = y , there y∈ , r
+
+concatMap-∈ : {A B : Set} (f : A → List B) {x : A} {y : B}
+  (xs : List A) → x ∈-list xs → y ∈-list f x →
+  y ∈-list concatMap f xs
+concatMap-∈ f [] ()
+concatMap-∈ f (x ∷ xs) here q = ∈-++-left (f x) (concatMap f xs) q
+concatMap-∈ f (x ∷ xs) (there p) q =
+  ∈-++-right (f x) (concatMap f xs) (concatMap-∈ f xs p q)
+
 ∈-list-dec : (x : ℕ) (xs : List ℕ) → (x ∈-list xs) ⊎ ¬ (x ∈-list xs)
 ∈-list-dec x [] = inj₂ λ ()
 ∈-list-dec x (y ∷ ys) with ℕ-eq-dec x y
@@ -296,3 +344,62 @@ length (_ ∷ xs) = suc (length xs)
 ... | inj₂ ne with ∈-list-dec x ys
 ...   | inj₁ i  = inj₁ (there i)
 ...   | inj₂ ni = inj₂ λ { here → ne refl ; (there i) → ni i }
+
+All-dec : {A : Set} (P : A → Set) →
+          (∀ x → P x ⊎ ¬ P x) → ∀ xs → All P xs ⊎ ¬ All P xs
+All-dec P dec [] = inj₁ tt
+All-dec P dec (x ∷ xs) with dec x | All-dec P dec xs
+... | inj₁ px | inj₁ ps = inj₁ (px , ps)
+... | inj₂ nx | _       = inj₂ λ p → nx (proj₁ p)
+... | _       | inj₂ ns = inj₂ λ p → ns (proj₂ p)
+
+data NoDuplicates {A : Set} : List A → Set where
+  []-unique : NoDuplicates []
+  _∷-unique_ : ∀ {x xs} → (x ∈-list xs → ⊥) →
+               NoDuplicates xs → NoDuplicates (x ∷ xs)
+
+select : {A : Set} (P : A → Set) →
+         (∀ x → P x ⊎ ¬ P x) → List A → List A
+select P dec [] = []
+select P dec (x ∷ xs) with dec x
+... | inj₁ _ = x ∷ select P dec xs
+... | inj₂ _ = select P dec xs
+
+select-sound : {A : Set} (P : A → Set)
+  (dec : ∀ x → P x ⊎ ¬ P x) {x : A} (xs : List A) →
+  x ∈-list select P dec xs → (x ∈-list xs) × P x
+select-sound P dec [] ()
+select-sound P dec (y ∷ ys) p with dec y
+select-sound P dec (y ∷ ys) here      | inj₁ py = here , py
+select-sound P dec (y ∷ ys) (there p) | inj₁ py with select-sound P dec ys p
+... | q , px = there q , px
+select-sound P dec (y ∷ ys) p         | inj₂ ny with select-sound P dec ys p
+... | q , px = there q , px
+
+select-complete : {A : Set} (P : A → Set)
+  (dec : ∀ x → P x ⊎ ¬ P x) {x : A} (xs : List A) →
+  x ∈-list xs → P x → x ∈-list select P dec xs
+select-complete P dec [] ()
+select-complete P dec (x ∷ xs) here px with dec x
+... | inj₁ _  = here
+... | inj₂ nx = ⊥-elim (nx px)
+select-complete P dec (y ∷ ys) (there p) px with dec y
+... | inj₁ _ = there (select-complete P dec ys p px)
+... | inj₂ _ = select-complete P dec ys p px
+
+sublists : {A : Set} → List A → List (List A)
+sublists []       = [] ∷ []
+sublists (x ∷ xs) =
+  map (x ∷_) (sublists xs) ++ sublists xs
+
+select-sublists : {A : Set} (P : A → Set)
+  (dec : ∀ x → P x ⊎ ¬ P x) (xs : List A) →
+  select P dec xs ∈-list sublists xs
+select-sublists P dec [] = here
+select-sublists P dec (x ∷ xs) with dec x
+... | inj₁ px =
+  ∈-++-left (map (x ∷_) (sublists xs)) (sublists xs)
+    (map-∈ (x ∷_) (sublists xs) (select-sublists P dec xs))
+... | inj₂ nx =
+  ∈-++-right (map (x ∷_) (sublists xs)) (sublists xs)
+    (select-sublists P dec xs)

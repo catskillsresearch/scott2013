@@ -11,7 +11,7 @@
 -- heavy. Cantor space Ω = ℕ → Bool is already first-class in
 -- TypeTopology (Escardó), so we take it as the sample space and generate
 -- a σ-algebra of Borel codes from coordinate events {ω | ω n ≡ b}.
--- There are no postulates: measurability is interpreted by the codes.
+-- Measurability is interpreted directly by the codes.
 ------------------------------------------------------------------------
 
 module Scott2013.Probability where
@@ -52,7 +52,7 @@ Measurable : (Ω → Set) → Set
 Measurable E = Σ Borel (λ B → ∀ ω → E ω ↔ ⟦ B ⟧ ω)
 
 ------------------------------------------------------------------------
--- σ-algebra operations (no postulates)
+-- σ-algebra operations
 ------------------------------------------------------------------------
 
 meas-empty : Measurable (λ _ → ⊥)

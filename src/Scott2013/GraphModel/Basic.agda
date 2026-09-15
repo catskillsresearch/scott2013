@@ -347,6 +347,16 @@ singleton-seq m = pair zero m
 members-singleton : ∀ m → members (singleton-seq m) ≡ m ∷ []
 members-singleton m = members-pair zero m
 
+encode-list : List ℕ → ℕ
+encode-list []       = zero
+encode-list (x ∷ xs) = pair (encode-list xs) x
+
+members-encode-list : ∀ xs → members (encode-list xs) ≡ xs
+members-encode-list []       = refl
+members-encode-list (x ∷ xs) =
+  trans (members-pair (encode-list xs) x)
+        (cong (x ∷_) (members-encode-list xs))
+
 pair-injective : ∀ n₁ m₁ n₂ m₂ → pair n₁ m₁ ≡ pair n₂ m₂ → (n₁ ≡ n₂) × (m₁ ≡ m₂)
 pair-injective n₁ m₁ n₂ m₂ eq =
   (cong proj₁ both) , (cong proj₂ both)
@@ -369,6 +379,13 @@ infixr 5 _∪ₚ_
 
 Finite : 𝒫ℕ → Set
 Finite X = Σ ℕ (λ n → ∀ m → X m ↔ (m ∈-set n))
+
+finite-list : ∀ xs → Finite (λ x → x ∈-list xs)
+finite-list xs =
+  encode-list xs
+  , λ m →
+      (λ p → subst (m ∈-list_) (sym (members-encode-list xs)) p)
+      , (λ p → subst (m ∈-list_) (members-encode-list xs) p)
 
 *2-double : ∀ m → 2 * m ≡ m + m
 *2-double m = cong (m +_) (+-zero m)

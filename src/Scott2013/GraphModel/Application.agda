@@ -273,6 +273,11 @@ thm-3-6-∪-rev F G {suc k} (inj₂ (inj₂ (n , m , peq , Gn))) = inj₂ (n , m
 -- Continuity helpers for S and the sequentializer
 ------------------------------------------------------------------------
 
+infixr 9 _∘′_
+
+_∘′_ : ∀ {A B C : Set} → (B → C) → (A → B) → A → C
+(g ∘′ f) x = g (f x)
+
 ·-left-cont : ∀ X → Continuous₁ (λ F → F · X)
 ·-left-cont X F m = fwd , bwd
   where
@@ -372,4 +377,162 @@ app-comp-right Φ B Φc X m = fwd , bwd
           (k
           , All-mono (members k) (λ x x∈ → ∈*-to-⊆ k k∈ x∈) (∈*-refl k)
           , Φkn)
+
+-- Composition and diagonal substitution preserve Scott continuity.
+cont-compose : ∀ (Φ Ψ : 𝒫ℕ → 𝒫ℕ) →
+               Continuous₁ Φ → Continuous₁ Ψ →
+               Continuous₁ (λ X → Φ (Ψ X))
+cont-compose Φ Ψ Φc Ψc X m = fwd , bwd
+  where
+    fwd : Φ (Ψ X) m →
+          Σ ℕ (λ k → (k ∈* X) × Φ (Ψ (setₚ k)) m)
+    fwd p with proj₁ (Φc (Ψ X) m) p
+    ... | j , j∈ΨX , Φj with ∈*-cont Ψ Ψc j X j∈ΨX
+    ... | k , k∈X , j∈Ψk =
+      k , k∈X , proj₂ (Φc (Ψ (setₚ k)) m) (j , j∈Ψk , Φj)
+
+    bwd : Σ ℕ (λ k → (k ∈* X) × Φ (Ψ (setₚ k)) m) →
+          Φ (Ψ X) m
+    bwd (k , k∈X , p) =
+      cont₁-mono Φ Φc
+        (cont₁-mono Ψ Ψc (∈*-to-⊆ k k∈X)) p
+
+cont₂-mono-left : ∀ (Φ : 𝒫ℕ → 𝒫ℕ → 𝒫ℕ) → Continuous₂ Φ →
+                  ∀ {F F′ X} → F ⊆ F′ → Φ F X ⊆ Φ F′ X
+cont₂-mono-left Φ Φc F⊆F′ {m} p with proj₁ (Φc _ _ m) p
+... | kF , kX , kF∈ , kX∈ , Φs =
+  proj₂ (Φc _ _ m)
+    (kF , kX , ∈*-mono kF F⊆F′ kF∈ , kX∈ , Φs)
+
+cont₂-compose : ∀ (H : 𝒫ℕ → 𝒫ℕ → 𝒫ℕ)
+                  (Φ Ψ : 𝒫ℕ → 𝒫ℕ) →
+                Continuous₂ H → Continuous₁ Φ → Continuous₁ Ψ →
+                Continuous₁ (λ X → H (Φ X) (Ψ X))
+cont₂-compose H Φ Ψ Hc Φc Ψc X m = fwd , bwd
+  where
+    fwd : H (Φ X) (Ψ X) m →
+          Σ ℕ (λ k → (k ∈* X) × H (Φ (setₚ k)) (Ψ (setₚ k)) m)
+    fwd p with proj₁ (Hc (Φ X) (Ψ X) m) p
+    ... | kF , kG , kF∈ , kG∈ , Hs
+      with ∈*-cont Φ Φc kF X kF∈ | ∈*-cont Ψ Ψc kG X kG∈
+    ... | i , i∈X , kF∈i | j , j∈X , kG∈j =
+      seq-append i j
+      , ∈*-append i j i∈X j∈X
+      , proj₂ (Hc (Φ (setₚ (seq-append i j)))
+                   (Ψ (setₚ (seq-append i j))) m)
+          (kF , kG
+          , All-mono (members kF)
+              (λ x → cont₁-mono Φ Φc (set-append-left i j)) kF∈i
+          , All-mono (members kG)
+              (λ x → cont₁-mono Ψ Ψc (set-append-right i j)) kG∈j
+          , Hs)
+
+    bwd : Σ ℕ (λ k → (k ∈* X) ×
+               H (Φ (setₚ k)) (Ψ (setₚ k)) m) →
+          H (Φ X) (Ψ X) m
+    bwd (k , k∈X , p) =
+      cont₂-mono-right H Hc
+        (cont₁-mono Ψ Ψc (∈*-to-⊆ k k∈X))
+        (cont₂-mono-left H Hc
+          (cont₁-mono Φ Φc (∈*-to-⊆ k k∈X)) p)
+
+diag-app-cont : Continuous₁ (λ X → X · X)
+diag-app-cont = cont₂-compose _·_ (λ X → X) (λ X → X)
+  thm-3-1 id-cont id-cont
+
+diag-Φ-cont : ∀ (Φ : 𝒫ℕ → 𝒫ℕ) → Continuous₁ Φ →
+              Continuous₁ (λ X → Φ (X · X))
+diag-Φ-cont Φ Φc = cont-compose Φ (λ X → X · X) Φc diag-app-cont
+
+∈*-cont₂ : ∀ (Φ : 𝒫ℕ → 𝒫ℕ → 𝒫ℕ) → Continuous₂ Φ →
+           ∀ k F X → k ∈* Φ F X →
+           Σ ℕ (λ kF → Σ ℕ (λ kX →
+             (kF ∈* F) × (kX ∈* X) ×
+             k ∈* Φ (setₚ kF) (setₚ kX)))
+∈*-cont₂ Φ Φc k F X p = go (members k) p
+  where
+    go : ∀ xs → All (Φ F X) xs →
+         Σ ℕ (λ kF → Σ ℕ (λ kX →
+           (kF ∈* F) × (kX ∈* X) ×
+           All (Φ (setₚ kF) (setₚ kX)) xs))
+    go []       _ = zero , zero , tt , tt , tt
+    go (m ∷ ms) (pm , rest) with proj₁ (Φc F X m) pm | go ms rest
+    ... | aF , aX , aF∈ , aX∈ , pfinite
+        | bF , bX , bF∈ , bX∈ , prest =
+      seq-append aF bF
+      , seq-append aX bX
+      , ∈*-append aF bF aF∈ bF∈
+      , ∈*-append aX bX aX∈ bX∈
+      , lift-left pfinite
+      , All-mono ms (λ x → lift-right) prest
+      where
+        lift-left : ∀ {x} →
+          Φ (setₚ aF) (setₚ aX) x →
+          Φ (setₚ (seq-append aF bF))
+            (setₚ (seq-append aX bX)) x
+        lift-left =
+          cont₂-mono-right Φ Φc
+            (set-append-left aX bX)
+          ∘′ cont₂-mono-left Φ Φc
+            (set-append-left aF bF)
+
+        lift-right : ∀ {x} →
+          Φ (setₚ bF) (setₚ bX) x →
+          Φ (setₚ (seq-append aF bF))
+            (setₚ (seq-append aX bX)) x
+        lift-right =
+          cont₂-mono-right Φ Φc
+            (set-append-right aX bX)
+          ∘′ cont₂-mono-left Φ Φc
+            (set-append-right aF bF)
+
+-- Substitute two binary-continuous maps into a binary-continuous map.
+cont₂-substitute : ∀ (H A B : 𝒫ℕ → 𝒫ℕ → 𝒫ℕ) →
+  Continuous₂ H → Continuous₂ A → Continuous₂ B →
+  Continuous₂ (λ F X → H (A F X) (B F X))
+cont₂-substitute H A B Hc Ac Bc F X m = fwd , bwd
+  where
+    fwd : H (A F X) (B F X) m →
+      Σ ℕ (λ kF → Σ ℕ (λ kX →
+        (kF ∈* F) × (kX ∈* X) ×
+        H (A (setₚ kF) (setₚ kX))
+          (B (setₚ kF) (setₚ kX)) m))
+    fwd p with proj₁ (Hc (A F X) (B F X) m) p
+    ... | kA , kB , kA∈ , kB∈ , Hfinite
+      with ∈*-cont₂ A Ac kA F X kA∈
+         | ∈*-cont₂ B Bc kB F X kB∈
+    ... | aF , aX , aF∈ , aX∈ , kA∈a
+        | bF , bX , bF∈ , bX∈ , kB∈b =
+      cF , cX
+      , ∈*-append aF bF aF∈ bF∈
+      , ∈*-append aX bX aX∈ bX∈
+      , proj₂ (Hc (A (setₚ cF) (setₚ cX))
+                   (B (setₚ cF) (setₚ cX)) m)
+          (kA , kB
+          , All-mono (members kA) (λ x →
+              cont₂-mono-right A Ac (set-append-left aX bX)
+              ∘′ cont₂-mono-left A Ac (set-append-left aF bF))
+              kA∈a
+          , All-mono (members kB) (λ x →
+              cont₂-mono-right B Bc (set-append-right aX bX)
+              ∘′ cont₂-mono-left B Bc (set-append-right aF bF))
+              kB∈b
+          , Hfinite)
+      where
+        cF = seq-append aF bF
+        cX = seq-append aX bX
+
+    bwd : Σ ℕ (λ kF → Σ ℕ (λ kX →
+        (kF ∈* F) × (kX ∈* X) ×
+        H (A (setₚ kF) (setₚ kX))
+          (B (setₚ kF) (setₚ kX)) m)) →
+      H (A F X) (B F X) m
+    bwd (kF , kX , kF∈ , kX∈ , p) =
+      cont₂-mono-right H Hc
+        (cont₂-mono-right B Bc (∈*-to-⊆ kX kX∈)
+          ∘′ cont₂-mono-left B Bc (∈*-to-⊆ kF kF∈))
+        (cont₂-mono-left H Hc
+          (cont₂-mono-right A Ac (∈*-to-⊆ kX kX∈)
+            ∘′ cont₂-mono-left A Ac (∈*-to-⊆ kF kF∈))
+          p)
 

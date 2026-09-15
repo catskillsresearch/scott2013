@@ -34,14 +34,13 @@ and `sources/README.md`.
 
 ## Status
 
-The library is a `--safe --without-K` development of the 2013 abstract:
-Scott pairing and the graph model on `𝒫ℕ`, Theorems 3.1–3.8, the
-arithmetic combinators and semantic RE interpreter (Definition 3.9),
-the sequentializer (Definition 4.3), regular and probabilistic language
-formers (Theorems 4.4–4.5), the `T₀` embedding and injectivity of
-`𝒫ℕ` (Theorems 3.10–3.12), and random variables on Cantor space with
-cylinder measure (Definition 4.1, Theorem 4.2, §5 coins). There are no
-postulates. See `arxiv.md` §3.4 for the theorem inventory.
+The library is a `--safe --without-K` development of the 2013 abstract.
+It includes genuine r.e. witnesses and graph equations for `RE` and the
+sequentializer, an independent finite-automata definition with both
+directions of Theorem 4.4, and literal `[0,1]` results relative to an
+explicit `LebesgueUnitInterval` structure.  The constructive Cantor-space
+model remains available as a separate alternative.  There are no
+postulates.  See the source-to-declaration ledger in `arxiv.md` §3.4.
 
 ## Report and archival files
 

@@ -269,6 +269,16 @@ thm-3-8-fp Φ Φc m (n , n∈∇ , ∇nm) with ∇-unfold Φ n m ∇nm
     n⊆∇-app {m′} (j , j∈n , pair∈n) =
       j , ∈*-mono j n⊆∇ j∈n , n⊆∇ pair∈n
 
+thm-3-8-fp-bwd : ∀ (Φ : 𝒫ℕ → 𝒫ℕ) → Continuous₁ Φ →
+                 ∀ m → Φ (lfp Φ) m → lfp Φ m
+thm-3-8-fp-bwd Φ Φc m =
+  lam-app-bwd (λ X → Φ (X · X)) (diag-Φ-cont Φ Φc) (∇ Φ) m
+
+thm-3-8-fixed : ∀ (Φ : 𝒫ℕ → 𝒫ℕ) → Continuous₁ Φ →
+                ∀ m → lfp Φ m ↔ Φ (lfp Φ) m
+thm-3-8-fixed Φ Φc m =
+  thm-3-8-fp Φ Φc m , thm-3-8-fp-bwd Φ Φc m
+
 -- Least: if Φ(Q)=Q then P ⊆ Q, by Scott's induction on sequence numbers.
 thm-3-8-least : ∀ (Φ : 𝒫ℕ → 𝒫ℕ) (Q : 𝒫ℕ) → Continuous₁ Φ →
                 (∀ m → Φ Q m → Q m) → (∀ m → Q m → Φ Q m) →
