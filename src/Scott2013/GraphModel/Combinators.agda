@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical-compatible --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 ------------------------------------------------------------------------
 -- Curry combinators, arithmetic operators, ∇, and the sequentializer

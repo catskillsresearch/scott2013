@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical-compatible --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 ------------------------------------------------------------------------
 -- Graph-model encodings from *Stochastic λ-Calculi* §2

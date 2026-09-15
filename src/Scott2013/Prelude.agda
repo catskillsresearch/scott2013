@@ -1,7 +1,8 @@
-{-# OPTIONS --cubical-compatible --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 ------------------------------------------------------------------------
 -- Minimal prelude (no standard library; `agda --safe --no-libraries`).
+-- `--without-K` is the TypeTopology flag: K-free, not Cubical Agda.
 ------------------------------------------------------------------------
 
 module Scott2013.Prelude where

@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical-compatible --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 ------------------------------------------------------------------------
 -- Probability space: Cantor space 2^ℕ in place of [0,1]

@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical-compatible --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 ------------------------------------------------------------------------
 -- Enumeration-operator application and λ-abstraction

@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical-compatible --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 ------------------------------------------------------------------------
 -- Formalization of Scott's Stochastic λ-Calculi (PROGIC 2013 / JAL 2014)
