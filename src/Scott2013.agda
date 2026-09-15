@@ -7,4 +7,9 @@
 
 module Scott2013 where
 
+import Scott2013.Prelude
 import Scott2013.GraphModel.Basic
+import Scott2013.GraphModel.Application
+import Scott2013.GraphModel.Combinators
+import Scott2013.Probability
+import Scott2013.Stochastic
