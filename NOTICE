@@ -1,0 +1,19 @@
+This repository's original Agda, scripts, and author-written documentation
+are licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Third-party source material (not Apache-2.0)
+--------------------------------------------
+
+sources/ScottPROGIC2013.pdf is Dana S. Scott, Stochastic λ-calculi: An
+extended abstract, Journal of Applied Logic, Volume 12, 2014, pages 369–376
+(PROGIC 2013). Copyright remains with the author and/or the journal
+publisher. It is included only as the cited primary source for this
+formalization. Redistributors must not treat it as licensed under
+Apache-2.0.
+
+The working Markdown transcription sources/ScottPROGIC2013.md retains
+Scott's wording under Scott's / the publisher's copyright. YAML headers,
+page markers, and editorial notes are part of this repository's
+documentation.
+
+See sources/README.md.

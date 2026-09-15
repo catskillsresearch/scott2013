@@ -1,0 +1,49 @@
+# Citation File Format — GitHub “Cite this repository.”
+
+cff-version: 1.2.0
+title: "Formalization of Scott's Stochastic λ-Calculi in Agda"
+message: "If you use this formalization, please cite it as below."
+type: software
+authors:
+  - family-names: Ericson
+    given-names: Lars Warren
+    affiliation: "Independent researcher, d/b/a Catskills Research Company"
+    email: "lars.ericson@catskillsresearch.com"
+    orcid: "https://orcid.org/0000-0001-8299-9361"
+  - family-names: Scott
+    given-names: Dana S.
+    affiliation: "Computer Science Department, Carnegie Mellon University, Emeritus"
+abstract: >-
+  Machine-checked Agda formalization of Dana Scott's PROGIC 2013 extended
+  abstract Stochastic λ-calculi (Journal of Applied Logic 12 (2014), 369–376),
+  covering the graph model of untyped λ-calculus via enumeration operators
+  and its expansion by random combinators. The report is prepared for the
+  Carnegie Mellon University School of Computer Science Technical Report
+  series as CMU-CS-26-XXX.
+keywords:
+  - Agda
+  - lambda calculus
+  - graph model
+  - enumeration operators
+  - stochastic lambda calculus
+  - random combinators
+  - formal verification
+repository-code: "https://github.com/catskillsresearch/scott2013"
+license: Apache-2.0
+version: 0.1.0
+date-released: 2026-09-15
+preferred-citation:
+  type: report
+  title: "Formalization of Scott's Stochastic λ-Calculi in Agda"
+  authors:
+    - family-names: Ericson
+      given-names: Lars Warren
+      affiliation: "Independent researcher, d/b/a Catskills Research Company"
+    - family-names: Scott
+      given-names: Dana S.
+      affiliation: "Computer Science Department, Carnegie Mellon University, Emeritus"
+  year: 2026
+  institution:
+    name: "School of Computer Science, Carnegie Mellon University"
+  url: "https://github.com/catskillsresearch/scott2013"
+  notes: "Carnegie Mellon University Computer Science Technical Report CMU-CS-26-XXX."
