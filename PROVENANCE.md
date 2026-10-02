@@ -5,11 +5,9 @@ This repository is a standalone Agda formalization of Dana Scott's PROGIC
 (2014), 369–376). It is not a thin wrapper and not a reimplementation of an
 independent formalization.
 
-Dana S. Scott is a co-author with Lars Warren Ericson of the resulting
-Carnegie Mellon University School of Computer Science technical report.
-Ericson directed and reviewed the Agda development with AI-agent assistance.
-Scott's coauthorship of the report is distinct from an independent external
-audit of each Agda source file.
+Lars Warren Ericson is the author of the accompanying report. Dana S. Scott
+passed the paper on to him. He is not a co-author. Ericson directed and
+reviewed the Agda development with AI-agent assistance.
 
 Sibling formalizations of related Scott papers:
 
@@ -28,8 +26,7 @@ Sibling formalizations of related Scott papers:
 
 The 2013 abstract cites the 1976 graph model as [1] and later domain-theory
 sources, but this repository imports none of the sibling libraries. The
-report is being prepared as **CMU-CS-26-XXX** and will be cross-archived on
-arXiv under cs.LO and math.LO.
+report will be deposited on arXiv under cs.LO and math.LO.
 
 The development lives in `src/Scott2013/`. There are no postulates. The
 library uses only Agda builtins (`Nat`, `Equality`, `Bool`, `Unit`) plus

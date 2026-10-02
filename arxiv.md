@@ -1,10 +1,8 @@
 # Formalization of Scott's Stochastic λ-Calculi in Agda
 
-**Authors.** Lars Warren Ericson (independent researcher, d/b/a Catskills
-Research Company; lars.ericson@catskillsresearch.com) and Dana S. Scott
-(Computer Science Department, Carnegie Mellon University, Emeritus).
-**Technical report.** CMU-CS-26-XXX, School of Computer Science, Carnegie
-Mellon University, Pittsburgh, PA 15213.
+**Author.** Lars Warren Ericson (independent researcher, d/b/a Catskills
+Research Company; lars.ericson@catskillsresearch.com). Dana S. Scott passed
+this paper on to the author. He is not a co-author.
 **Source paper.** Dana S. Scott, *Stochastic λ-calculi: An extended
 abstract*, Journal of Applied Logic 12 (2014), 369–376 (PROGIC 2013).
 **Repository.** https://github.com/catskillsresearch/scott2013
@@ -44,8 +42,8 @@ function theory and then adds random combinators.
 This formalization is a standalone Agda development of the 2013/2014
 abstract. It does not import the sibling formalizations of Scott 1972, 1976,
 or 2026, though those papers supply historical and later context.
-This formalization was undertaken after Dana S. Scott suggested the paper as
-a target for mechanization.
+This formalization was undertaken after Dana S. Scott passed the paper on
+to the author.
 
 ### 1.2 Retrospective Remarks by Dana S. Scott
 
@@ -928,9 +926,8 @@ domain-valued random-variable development remain separate repositories.
 
 The complete Agda development, report source, and build scripts are at
 the public GitHub repository named `scott2013` under
-`catskillsresearch`. This version is being prepared as Carnegie Mellon
-University School of Computer Science Technical Report **CMU-CS-26-XXX**
-and will be cross-archived on arXiv under **cs.LO** and **math.LO**.
+`catskillsresearch`. The report will be deposited on arXiv under
+**cs.LO** and **math.LO**.
 
 ### License and source PDF
 
@@ -940,10 +937,12 @@ repository `NOTICE` and source-material README for the copyright carve-out.
 
 ## Acknowledgments
 
+Dana S. Scott passed this paper on to the author. He is not a co-author.
+
 ### AI-assisted development
 
 Agda in this repository was drafted with AI-agent assistance under Lars
-Warren Ericson's direction and review. The human authors retain
+Warren Ericson's direction and review. The author retains
 responsibility for the mathematical content, the formalization route, and
 every formal claim. **No large language model is listed as a co-author.**
 

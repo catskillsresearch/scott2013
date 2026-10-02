@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-r"""Convert arxiv_with_code.md to a CMU SCS technical report (arXiv-ready).
+r"""Convert arxiv_with_code.md to arxiv.tex (arXiv-ready).
 
 Pipeline:
   1. Drop the GitHub-only navigation preamble (auto-gen note, document map, file index).
@@ -39,9 +39,9 @@ PUPPETEER_CONFIG = SCRIPTS / "puppeteer-config.json"
 LISTING_CHUNK_LINES = 400
 
 GITHUB_URL = r"https://github.com/catskillsresearch/scott2013"
-REPORT_NUMBER = "CMU-CS-26-XXX"
 REPORT_DATE = "September 2026"
 ERICSON_EMAIL = "lars.ericson@catskillsresearch.com"
+ERICSON_ORCID = "0000-0001-8299-9361"
 
 
 def find_chrome() -> str | None:
@@ -371,51 +371,50 @@ def insert_appendix_command(latex: str) -> str:
 
 
 def cleanup_abstract_latex(latex: str) -> str:
-    """Keep the abstract pdfLaTeX/arXiv-safe: ASCII plus standard LaTeX escapes."""
+    """Keep the abstract pdfLaTeX/arXiv-safe and a single paragraph."""
     latex = latex.replace("\\pandocbounded{", "{")
     latex = latex.replace("\\textbf{{[}", "\\textbf{[")
     latex = latex.replace("\\texttt{{[}", "\\texttt{[")
     latex = latex.replace("{]}}", "]}")
     latex = re.sub(r"\\begin\{center\}\\rule\{.*?\}\\end\{center\}\s*", "", latex, flags=re.DOTALL)
+    latex = re.sub(r"\n\s*\n+", " ", latex)
+    latex = re.sub(r"[ \t]*\n[ \t]*", " ", latex)
+    latex = re.sub(r"\s+", " ", latex).strip()
     return latex
 
 
 def build_title_page(abstract_latex: str) -> str:
-    ericson_email_latex = rf"\texttt{{{ERICSON_EMAIL}}}"
-    github_latex = rf"\url{{{GITHUB_URL}}}"
+    """Ordinary article title page."""
     return textwrap.dedent(
         f"""
         \\title{{{TITLE}}}
 
         \\author{{
-          Lars Warren Ericson \\\\
-          {{\\normalfont\\small Independent researcher, d/b/a Catskills Research Company}} \\\\
-          {{\\normalfont\\small {ericson_email_latex}}} \\\\[1.5ex]
-          Dana S. Scott \\\\
-          {{\\normalfont\\small Computer Science Department, Carnegie Mellon University, Emeritus}}
+          Lars Warren Ericson\\\\
+          Independent researcher, d/b/a Catskills Research Company\\\\
+          \\texttt{{{ERICSON_EMAIL}}}\\\\
+          ORCID {ERICSON_ORCID}
         }}
-
         \\date{{{REPORT_DATE}}}
-        \\trnumber{{{REPORT_NUMBER}}}
-        \\keywords{{Agda; formal verification; lambda calculus; graph model;
-          enumeration operators; stochastic lambda calculus}}
-        \\citationinfo{{This report will be cross-archived on arXiv in
-          \\texttt{{cs.LO}} and \\texttt{{math.LO}}.\\\\
-          Source repository: {github_latex}}}
-        \\copyrightnotice{{Copyright \\copyright\\ 2026 Lars Warren Ericson and Dana S. Scott}}
-        \\abstract{{
-        {abstract_latex.strip()}
-        }}
         \\hypersetup{{
           pdftitle={{{TITLE}}},
-          pdfauthor={{Lars Warren Ericson; Dana S. Scott}},
-          pdfsubject={{Carnegie Mellon University School of Computer Science Technical Report {REPORT_NUMBER}}},
-          pdfkeywords={{Agda, formal verification, lambda calculus, graph model}}
+          pdfauthor={{Lars Warren Ericson}},
+          pdfsubject={{Agda formalization of Scott's stochastic lambda calculi}},
+          pdfkeywords={{Agda, formal verification, lambda calculus, graph model, enumeration operators}}
         }}
 
         \\begin{{document}}
 
         \\maketitle
+
+        \\begin{{abstract}}
+        {abstract_latex.strip()} Sources: \\url{{{GITHUB_URL}}}.
+        \\end{{abstract}}
+
+        \\noindent\\textbf{{Keywords.}} Agda; formal verification; lambda calculus; graph model;
+        enumeration operators; stochastic lambda calculus.
+
+        \\clearpage
         """
     ).strip()
 

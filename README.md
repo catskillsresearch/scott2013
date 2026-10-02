@@ -7,10 +7,8 @@ Extended Abstract* (PROGIC 2013; J. Applied Logic 12 (2014), 369–376).
 
 The accompanying report, *Formalization of Scott's Stochastic λ-Calculi in
 Agda*, is by **Lars Warren Ericson** (independent researcher, d/b/a
-Catskills Research Company) and **Dana S. Scott** (Computer Science
-Department, Carnegie Mellon University, Emeritus). It is being prepared for
-the Carnegie Mellon University School of Computer Science Technical Report
-series as **CMU-CS-26-XXX**, with cross-archival to arXiv under cs.LO and
+Catskills Research Company). Dana S. Scott passed the paper on to him. He is
+not a co-author. The report will be deposited on arXiv under cs.LO and
 math.LO.
 
 Scott expands the graph model of untyped λ-calculus — enumeration operators
@@ -46,10 +44,9 @@ postulates.  See the source-to-declaration ledger in `arxiv.md` §3.6.
 
 | File | Role |
 |---|---|
-| `arxiv.md` | CMU technical-report narrative and theorem inventory |
-| `arxiv.pdf` | Built CMU report PDF for cross-archival |
-| `docs/CMU_TECH_REPORT.md` | Report-number, build, and release checklist |
-| `docs/ARXIV_SUBMISSION.md` | arXiv cross-archive metadata |
+| `arxiv.md` | Report narrative and theorem inventory |
+| `arxiv.pdf` | Built report PDF |
+| `docs/ARXIV_SUBMISSION.md` | arXiv metadata |
 | `sources/ScottPROGIC2013.pdf` | Primary source PDF (Scott PROGIC 2013 / JAL 2014) |
 | `src/Scott2013/` | Agda development |
 | `PROVENANCE.md` | Relation to sibling Scott formalizations |

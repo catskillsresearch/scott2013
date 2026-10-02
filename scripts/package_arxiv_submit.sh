@@ -6,7 +6,6 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 TEX="arxiv.tex"
-CMU_STYLE="cmu-titlepage2.sty"
 LISTINGS_DIR="agda-listings"
 FIGURES_DIR="figures"
 OUT_DIR="dist"
@@ -24,10 +23,6 @@ mapfile -t FIGURE_PNGS < <(find "$FIGURES_DIR" -maxdepth 1 -name '*.png' 2>/dev/
 missing=0
 if [[ ! -f "$TEX" ]]; then
   echo "error: missing $TEX" >&2
-  missing=1
-fi
-if [[ ! -f "$CMU_STYLE" ]]; then
-  echo "error: missing $CMU_STYLE" >&2
   missing=1
 fi
 if [[ ! -d "$LISTINGS_DIR" ]]; then
@@ -67,7 +62,6 @@ from pathlib import Path
 
 sources = [
     {"filename": "arxiv.tex", "usage": "toplevel"},
-    {"filename": "cmu-titlepage2.sty", "usage": "include"},
 ]
 for path in sorted(p for p in Path("agda-listings").iterdir() if p.is_file()):
     sources.append({"filename": path.as_posix(), "usage": "include"})
@@ -84,7 +78,6 @@ echo "==> Packaging"
 zip -r "$ZIP" \
   00README.json \
   "$TEX" \
-  "$CMU_STYLE" \
   "$LISTINGS_DIR" \
   "${AGDA_FILES[@]}" \
   "${FIGURE_PNGS[@]}"
