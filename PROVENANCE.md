@@ -5,8 +5,8 @@ This repository is a standalone Agda formalization of Dana Scott's PROGIC
 (2014), 369–376). It is not a thin wrapper and not a reimplementation of an
 independent formalization.
 
-Lars Warren Ericson is the author of the accompanying report. Dana S. Scott
-passed the paper on to him. He is not a co-author. Ericson directed and
+Lars Warren Ericson is the author of the accompanying report. The author
+is grateful to Dana S. Scott for passing on the paper. Ericson directed and
 reviewed the Agda development with AI-agent assistance.
 
 Sibling formalizations of related Scott papers:

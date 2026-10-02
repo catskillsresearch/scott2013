@@ -14,8 +14,7 @@ abstract: >-
   Machine-checked Agda formalization of Dana Scott's PROGIC 2013 extended
   abstract Stochastic λ-calculi (Journal of Applied Logic 12 (2014), 369–376),
   covering the graph model of untyped λ-calculus via enumeration operators
-  and its expansion by random combinators. Dana S. Scott passed the paper
-  on to the author and is not a co-author.
+  and its expansion by random combinators.
 keywords:
   - Agda
   - lambda calculus
@@ -37,4 +36,4 @@ preferred-citation:
       affiliation: "Independent researcher, d/b/a Catskills Research Company"
   year: 2026
   url: "https://github.com/catskillsresearch/scott2013"
-  notes: "Dana S. Scott passed the paper on to the author. He is not a co-author."
+  notes: "The author is grateful to Dana S. Scott for passing on the paper."

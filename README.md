@@ -7,8 +7,8 @@ Extended Abstract* (PROGIC 2013; J. Applied Logic 12 (2014), 369–376).
 
 The accompanying report, *Formalization of Scott's Stochastic λ-Calculi in
 Agda*, is by **Lars Warren Ericson** (independent researcher, d/b/a
-Catskills Research Company). Dana S. Scott passed the paper on to him. He is
-not a co-author. The report will be deposited on arXiv under cs.LO and
+Catskills Research Company). The author is grateful to Dana S. Scott for
+passing on the paper. The report will be deposited on arXiv under cs.LO and
 math.LO.
 
 Scott expands the graph model of untyped λ-calculus — enumeration operators

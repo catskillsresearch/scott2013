@@ -7,8 +7,8 @@ Copy-paste fields for the arXiv web form. Regenerate the PDF and zip with
 
 **Title:** Formalization of Scott's Stochastic λ-Calculi in Agda
 
-**Author:** Lars Warren Ericson. Dana S. Scott passed the paper on to him.
-He is not a co-author.
+**Author:** Lars Warren Ericson. The author is grateful to Dana S. Scott
+for passing on the paper.
 
 ## Abstract (plain text, under 1920 characters)
 

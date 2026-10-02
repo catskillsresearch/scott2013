@@ -1,8 +1,8 @@
 # Formalization of Scott's Stochastic λ-Calculi in Agda
 
 **Author.** Lars Warren Ericson (independent researcher, d/b/a Catskills
-Research Company; lars.ericson@catskillsresearch.com). Dana S. Scott passed
-this paper on to the author. He is not a co-author.
+Research Company; lars.ericson@catskillsresearch.com). The author is
+grateful to Dana S. Scott for passing on the paper.
 **Source paper.** Dana S. Scott, *Stochastic λ-calculi: An extended
 abstract*, Journal of Applied Logic 12 (2014), 369–376 (PROGIC 2013).
 **Repository.** https://github.com/catskillsresearch/scott2013
@@ -42,8 +42,7 @@ function theory and then adds random combinators.
 This formalization is a standalone Agda development of the 2013/2014
 abstract. It does not import the sibling formalizations of Scott 1972, 1976,
 or 2026, though those papers supply historical and later context.
-This formalization was undertaken after Dana S. Scott passed the paper on
-to the author.
+The author is grateful to Dana S. Scott for passing on the paper.
 
 ### 1.2 Retrospective Remarks by Dana S. Scott
 
@@ -937,7 +936,7 @@ repository `NOTICE` and source-material README for the copyright carve-out.
 
 ## Acknowledgments
 
-Dana S. Scott passed this paper on to the author. He is not a co-author.
+The author is grateful to Dana S. Scott for passing on the paper.
 
 ### AI-assisted development
 
