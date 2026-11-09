@@ -52,13 +52,43 @@ The author is grateful to Dana S. Scott for passing on the paper.
 
 ## 2. Tour of the Formalization
 
-This section follows the paper's order.  Definition excerpts show the
-complete computational gist; theorem excerpts show the checked statement
-and the proof's principal construction rather than reproducing long
-transport calculations.  Names such as `Σ`, `×`, and `↔` are supplied by
-the local K-free prelude.
+This section follows the paper's order.  Immediately under each heading
+is Scott's wording for the passage being formalized.  The paragraphs
+after that box are notes on the Agda reading.  Definition excerpts show
+the complete computational gist; theorem excerpts show the checked
+statement and the proof's principal construction rather than reproducing
+long transport calculations.  Names such as `Σ`, `×`, and `↔` are
+supplied by the local K-free prelude.
 
 ### 2.1 Pairing, sequence numbers, finite sets, and star
+
+```source
+Let $\mathbb{N}$ be the set of natural numbers, on which we can use a very easy to define pairing function: $(n,m) = 2^n(2m+1)$. This puts the pairs of natural numbers into a one-one correspondence with the positive integers. Sequence numbers can now be defined as:
+
+$$
+\langle\rangle = 0
+\quad\text{and}\quad
+\langle n_0, n_1, \ldots, n_{k-1}, n_k\rangle
+= (\langle n_0, n_1, \ldots, n_{k-1}\rangle, n_k).
+$$
+
+This notation puts finite sequences of elements of $\mathbb{N}$ into a one-one correspondence with the whole of the set $\mathbb{N}$. Finite sets of natural numbers can be numbered as follows:
+
+$$
+\mathrm{set}(0) = \emptyset
+\quad\text{and}\quad
+\mathrm{set}((n,m)) = \mathrm{set}(n) \cup \{m\}.
+$$
+
+It then follows that:
+
+$$
+\mathrm{set}(\langle n_0, n_1, \ldots, n_{k-1}, n_k\rangle)
+= \{n_0, n_1, \ldots, n_{k-1}, n_k\}.
+$$
+
+There are many other popular ways of numbering (Gödel-numbering) pairs, sequences and sets, but the choice of a numbering system is not so very important as long as the functions are computable. And to these notations we add the Kleene star: $X^* = \{ n \mid \mathrm{set}(n) \subseteq X \}$, which gives the set $X^*$ of all (numbers of) finite sequences of elements of a set $X \subseteq \mathbb{N}$. Note that $\mathbb{N}^* = \mathbb{N}$ and $\emptyset^* = \{0\}$.
+```
 
 Scott's exact pairing is used.  Zero remains the empty sequence;
 `members` decodes cons-codes, while `setₚ n` and star are literally
@@ -83,6 +113,22 @@ n ∈* X = All X (members n)
 
 ### 2.2 Definitions 2.1 and 2.2: application and continuity
 
+```source
+**Definition 2.1.** The enumeration operators are identified with the sets $F$ of natural numbers which operate on sets of integers through the binary operation of application:
+
+$$
+F(X) = \{ m \mid \exists n \in X^*.\ (n,m) \in F \}.
+$$
+
+The idea here is that, as you start enumerating the elements of the set $X$, you can also then enumerate the elements of the set $X^*$. Along with these enumerations, you can also enumerate the pairs in $F$. Every time you see a match between a sequence number $n \in X^*$ and the first term of a pair $(n,m) \in F$, you then output $m$ as an element of $F(X)$. The enumerations of the sets $F$ and $X$ thus generate the enumeration of the set $F(X)$.
+
+The powerset $\mathcal{P}(\mathbb{N}) = \{ X \mid X \subseteq \mathbb{N} \}$ can be considered as being a topological space with the sets $Q_n = \{ X \mid n \in X^* \}$ as a basis for the topology.
+
+**Definition 2.2.** We say that a function $\Phi : \mathcal{P}(\mathbb{N})^n \longrightarrow \mathcal{P}(\mathbb{N})$ of $n$-arguments is continuous in this topology iff (for all integers $m$) we have: $m \in \Phi(X_0, X_1, \ldots, X_{n-1})$ iff there are $k_i \in X_i^*$ (for all $i<n$) where $m \in \Phi(\mathrm{set}(k_0), \mathrm{set}(k_1), \ldots, \mathrm{set}(k_{n-1}))$.
+
+In words we can paraphrase this definition as saying that a function $\Phi$ is continuous just in case a finite amount of information about the function value $\Phi(X_0, X_1, \ldots, X_{n-1})$ is exactly determined by a finite amount of information about the arguments $X_0, X_1, \ldots, X_{n-1}$.
+```
+
 Definition 2.1 carries the finite input witness, its star proof, and the
 graph entry.  Definition 2.2 says output membership is equivalent to
 membership computed from finite approximants of every input.
@@ -102,6 +148,10 @@ Continuous₂ Φ = ∀ F X m →
 
 ### 2.3 Theorem 3.1: application is continuous
 
+```source
+**Theorem 3.1.** The application operation $F(X)$ is continuous as a function of two variables on $\mathcal{P}(\mathbb{N})$.
+```
+
 The application witness supplies the finite part of `X`; its single
 graph entry supplies the finite part of `F`.  Re-expanding both star
 witnesses proves the converse.
@@ -119,6 +169,19 @@ thm-3-1 F X m = thm-3-1-fwd F X m , thm-3-1-bwd F X m
 ```
 
 ### 2.4 Theorem 3.2 and Definition 3.3: the largest graph
+
+```source
+**Theorem 3.2.** For every continuous function $\Phi : \mathcal{P}(\mathbb{N}) \longrightarrow \mathcal{P}(\mathbb{N})$ there is a largest set $F$ such that for all $X \subseteq \mathbb{N}$ we have $\Phi(X) = F(X)$.
+
+Note that we can characterize the $F$ we need as follows: $F = \{0\} \cup \{ (n,m) \mid m \in \Phi(\mathrm{set}(n)) \}$, because by the definition of continuity this set uniquely determines $\Phi$. And, from the definition of application, for any other set $G$ where for all $X \subseteq \mathbb{N}$ we have $G(X) = \Phi(X)$, we find $G \subseteq F$.
+
+**Definition 3.3.** For any expression $[\ldots X\ldots]$ defining a continuous function, we use the abstraction notation:
+
+$$
+\lambda X.\ [\ldots X\ldots]
+= \{0\} \cup \{ (n,m) \mid m \in [\ldots\mathrm{set}(n)\ldots] \}.
+$$
+```
 
 `lam Φ` is Scott's $\{0\}\cup\{(n,m)\mid
 m\in\Phi(\mathrm{set}(n))\}$.  Application recovers any continuous
@@ -139,6 +202,27 @@ lam-largest : ∀ Φ G →
 ```
 
 ### 2.5 Theorems 3.4–3.6: iterated abstraction and lattice laws
+
+```source
+**Theorem 3.4.** If $\Phi(X_0, X_1, \ldots, X_{n-1})$ is continuous in all the variables, then the $\lambda X_0.\Phi(X_0, X_1, \ldots, X_{n-1})$ is continuous in all of the remaining variables.
+
+**Corollary 3.5.** If $\Phi(X_0, X_1, \ldots, X_{n-1})$ is continuous in all the variables, then there is a largest set $F$ such that $F(X_0)(X_1)\ldots(X_{n-1}) = \Phi(X_0, X_1, \ldots, X_{n-1})$ for all the $X_0, X_1, \ldots, X_{n-1} \in \mathcal{P}(\mathbb{N})$.
+
+Note, therefore, that generally $F \subseteq \lambda X.F(X)$.
+
+**Theorem 3.6.** For all sets of integers $F$ and $G$ we have:
+
+$$
+\lambda X.\ F(X) \subseteq \lambda X.\ G(X)
+\iff \forall X.\ F(X) \subseteq G(X),
+$$
+
+$$
+\lambda X.\ (F(X) \cap G(X)) = \lambda X.\ F(X) \cap \lambda X.\ G(X)
+\quad\text{and}\quad
+\lambda X.\ (F(X) \cup G(X)) = \lambda X.\ F(X) \cup \lambda X.\ G(X).
+$$
+```
 
 Theorem 3.4 is the binary instance used for iterated abstraction.
 `lam₂` realizes Corollary 3.5; its two equivalences expose one
@@ -183,6 +267,16 @@ thm-3-6-∪-rev : ∀ F G →
 
 ### 2.6 Definition 3.7: recursive enumerability and computability
 
+```source
+**Definition 3.7.** A continuous operator $\Phi(X_0, X_1, \ldots, X_{n-1})$ is computable iff in $\mathcal{P}(\mathbb{N})$ the following set is recursively enumerable:
+
+$$
+F = \lambda X_0\,\lambda X_1\,\ldots\,\lambda X_{n-1}.\ \Phi(X_0, X_1, \ldots, X_{n-1}).
+$$
+
+From this it follows that all pure $\lambda$-terms (which correspond to Curry's combinators, see [3]) define computable operators in the model.
+```
+
 An r.e. proposition has a total fuel-indexed Boolean search: success is
 sound, and every proof succeeds at some fuel.  Pointwise use gives an
 r.e. set; this is effective data, not “explicit definability.”
@@ -220,6 +314,10 @@ record Computable₂ (Φ : 𝒫ℕ → 𝒫ℕ → 𝒫ℕ) : Set₁ where
 
 ### 2.7 Theorem 3.8: a computable least fixed point
 
+```source
+**Theorem 3.8.** If $\Phi(X)$ is continuous and we let $\nabla = \lambda X.\ \Phi(X(X))$, then $P = \nabla(\nabla)$ is the least fixed point of $\Phi$. Moreover, the least fixed point of a computable operator is always computable.
+```
+
 The paper's $\nabla$ and $P=\nabla(\nabla)$ are literal.  Fixedness is
 pointwise in both directions; leastness uses induction on sequence codes.
 
@@ -249,6 +347,36 @@ thm-3-8-computable : ∀ Φ →
 ```
 
 ### 2.8 Combinators and Definition 3.9
+
+```source
+**Definition 3.9.** The basic arithmetic combinators are the following three recursively enumerable sets:
+
+$$
+\begin{aligned}
+\mathrm{Succ}(X) &= \{ n+1 \mid n \in X \}, \\
+\mathrm{Pred}(X) &= \{ n \mid n+1 \in X \}, \\
+\mathrm{Test}(Z)(X)(Y)
+&= \{ n \in X \mid 0 \in Z \}
+  \cup \{ m \in Y \mid \exists k.\ k+1 \in Z \}.
+\end{aligned}
+$$
+
+Using standard methods of $\lambda$-calculus and knowledge of primitive recursive functions, we can show that the arithmetic combinators suffice for defining all recursively enumerable sets. Indeed, every such set can be put into the form $\mathrm{RE}(\{n\})$, where we have a computable $\mathrm{RE} = \lambda X.\ \mathrm{RE}(X)$ so that
+
+(i) $\mathrm{RE}(\{0\}) = \lambda Y.\lambda X.\ Y$,
+
+(ii) $\mathrm{RE}(\{1\}) = \lambda Z.\lambda Y.\lambda X.\ Z(X)(Y(X))$,
+
+(iii) $\mathrm{RE}(\{2\}) = \mathrm{Test}$,
+
+(iv) $\mathrm{RE}(\{3\}) = \mathrm{Succ}$,
+
+(v) $\mathrm{RE}(\{4\}) = \mathrm{Pred}$, and
+
+(vi) $\mathrm{RE}(\{4 + (n,m)\}) = \mathrm{RE}(\{n\})(\mathrm{RE}(\{m\}))$, for all $n$ and $m$.
+
+The above equations (i)–(vi) could be put into one, rather large, fixed-point equation in order to show that $\mathrm{RE}$ is indeed recursively enumerable.
+```
 
 The ordinary combinators are graph abstractions of their semantic
 operators.  Their correctness lemmas state actual graph application,
@@ -325,6 +453,20 @@ RE-re : RESet RE
 
 ### 2.9 Theorems 3.10–3.12: universality and injectivity
 
+```source
+**Theorem 3.10.** Every countably based $T_0$-space is homeomorphic to a subspace of $\mathcal{P}(\mathbb{N})$.
+
+A $T_0$-space is one where points are uniquely determined by the open sets to which they belong. Assume $T$ is such a space, and let the $U_n$ be the elements of a countable basis for the topology of the space $T$. Define a mapping $\varepsilon : T \longrightarrow \mathcal{P}(\mathbb{N})$ by the equation $\varepsilon(X) = \{ n \mid X \in U_n \}$ on elements $X \in T$. By the very definition of being a $T_0$-space, it follows that the mapping $\varepsilon$ is one-one.
+
+The sets of the special form $Q_{\langle m \rangle} = \{ X \mid m \in X \}$ provide a subbasis for the topology. To prove that $\varepsilon$ is continuous, we need only check that the inverse-image sets $\{ X \in T \mid \varepsilon(X) \in Q_{\langle m \rangle} \} = U_m$ are open. And $\varepsilon(U_m) = \{ \varepsilon(X) \mid X \in U_m \} = \varepsilon(T) \cap Q_{\langle m \rangle}$, which is indeed open.
+
+**Definition 3.11.** A space $S$ is called injective iff whenever $T$ is a subspace of another space $U$ and when $\Phi : T \longrightarrow S$ is continuous, then $\Phi$ can be extended to a continuous function $\Psi: U \longrightarrow S$.
+
+**Theorem 3.12.** The space $\mathcal{P}(\mathbb{N})$ is injective.
+
+Assume $T$ is a subspace of $U$ and $\Phi : T \longrightarrow \mathcal{P}(\mathbb{N})$ is continuous. The sets $T_n = \{ X \in T \mid n \in \Phi(X) \}$ must be open subsets of $T$. By the definition of subspace topology, we can write $T_n = T \cap U_n$, where the $U_n$ are open in $U$. Now define $\Psi: U \longrightarrow \mathcal{P}(\mathbb{N})$ by the equation $\Psi(Y) = \{ n \mid Y \in U_n \}$. By definition, $\Psi$ is continuous, and, for $X \in T$, we find $\Psi(X) = \Phi(X)$.
+```
+
 A countably based $T_0$ space is presented by points, basis membership,
 and the $T_0$ separation principle.  The map
 $\varepsilon(x)=\{n\mid x\in U_n\}$ is simply basis membership viewed as
@@ -377,6 +519,18 @@ module Injectivity
 ```
 
 ### 2.10 Definition 4.1: literal random variables
+
+```source
+**Definition 4.1.** By a random variable in our model we understand a function on the unit interval
+
+$$
+X : [0,1] \longrightarrow \mathcal{P}(\mathbb{N}),
+$$
+
+where, for each $n \in \mathbb{N}$, the set $\{ t \in [0,1] \mid n \in X(t) \}$ is always Lebesgue measurable.
+
+We use the unit interval here as a standard probability space. Any other convenient probability space (along with its given measure) could have been used for this discussion.
+```
 
 The generic measure layer represents events as predicates and packages
 closure under Boolean and countable operations.  Probability values and
@@ -440,6 +594,23 @@ record RandomVar : Set₁ where
 
 ### 2.11 Theorem 4.2 and equality events
 
+```source
+**Theorem 4.2.** Given two random variables $X, Y : [0,1] \longrightarrow \mathcal{P}(\mathbb{N})$, the application operation defined by $X(Y)(t) = X(t)(Y(t))$ produces for us again a random variable.
+
+The easy proof of this theorem is completely analogous to the theorem that the sum of two numerical random variables is again a random variable — because numerical addition on the real numbers is a continuous and, therefore, a Borel-measurable operation. The same goes for application on $\mathcal{P}(\mathbb{N})$ owing to continuity.
+
+Note, too, that for random variables $X, Y : [0,1] \longrightarrow \mathcal{P}(\mathbb{N})$, equations between them can be assigned a well defined probability, because an "event" such as
+
+$$
+[\![ X = Y ]\!]
+= \{ t \in [0,1] \mid
+  \forall n \in X(t).\ n \in Y(t)
+  \land \forall n \in Y(t).\ n \in X(t) \}
+$$
+
+is always Lebesgue measurable.
+```
+
 Random application is pointwise graph application.  Membership of `m`
 is a countable union over finite witnesses `n`, intersecting the event
 that all members of `n` occur in `Y(t)` with the coordinate event
@@ -480,6 +651,25 @@ equality-probability X Y =
 
 ### 2.12 Definition 4.3: the sequentializer
 
+```source
+**Definition 4.3.** Let $\mathbb{S} = \lambda F.\ \mathbb{S}(F)$ be a suitable recursively enumerable set where
+
+$$
+\mathbb{S}(F)(\{0\}) = \lambda X.\ X
+\quad\text{and}\quad
+\mathbb{S}(F)(\{(n,m)\}) = F(\{m\}) \circ \mathbb{S}(F)(\{n\}).
+$$
+
+We can refer to the combinator $\mathbb{S}$ as the sequentializer, for it takes any operator $F$ and any sequence of integers $\langle n_0, n_1, \ldots, n_{k-1}, n_k\rangle$ and produces a corresponding sequence of compositions:
+
+$$
+\mathbb{S}(F)(\langle n_0, n_1, \ldots, n_{k-1}, n_k\rangle)
+= F(\{n_k\}) \circ F(\{n_{k-1}\}) \circ \cdots \circ F(\{n_1\}) \circ F(\{n_0\}).
+$$
+
+Note the order on the right. We write as usual $F \circ G = \lambda X.\ F(G(X))$ for the composition of operators.
+```
+
 Because `members σ` lists the last symbol first, the recursive `run`
 processes its tail before applying the head transition.  This gives the
 composition order in Scott's display.  `𝕊-on` lifts a singleton sequence
@@ -517,6 +707,18 @@ application, prove composition, and state both recurrences extensionally.
 ```
 
 ### 2.13 Theorem 4.4: exactly the regular languages
+
+```source
+**Theorem 4.4.** Let $\Sigma \in \mathcal{P}(\mathbb{N})$ be finite, then the regular languages contained in $\Sigma^*$ are exactly the sets of the form
+
+$$
+\{ \sigma \in \Sigma^* \mid 0 \in \mathbb{S}(A)(\{\sigma\})(Q) \},
+$$
+
+where $A, Q \in \mathcal{P}(\mathbb{N})$ are given finite sets.
+
+Here $\Sigma$ is to be thought of as a fixed alphabet, the operator $A$ as defining an automaton, and $Q$ is the initial state for running the automaton. Note that we could also have let $Q = \{q\}$, but the larger sets give the same languages over the class of all such representations of automata. The sequentializer $\mathbb{S}$ then runs the automaton, and, by convention, hitting a state containing the number $0$ indicates success or acceptance. Note that as $A$ is finite, then all values $A(\{n\})(X)$ are also finite sets, so we never encounter more than a finite number of finite states of a computation.
+```
 
 The standard side is independent of Scott graphs: a DFA has a finite
 state list, initial-state proof, closed transition function, and Boolean
@@ -575,6 +777,16 @@ thm-4-4 : ∀ Alph L → StandardRegular Alph L ↔ RegularIn Alph L
 
 ### 2.14 Theorem 4.5: probabilistic languages
 
+```source
+**Theorem 4.5.** Let $\Sigma, Q \in \mathcal{P}(\mathbb{N})$ be finite, let $A$ be a random variable taking values in a finite subset of finite elements of $\mathcal{P}(\mathbb{N})$, and let $\delta \in [0,1]$. Then the probabilistic languages contained in $\Sigma^*$ are among the sets
+
+$$
+\{ \sigma \in \Sigma^* \mid \#([\![ 0 \in \mathbb{S}(A)(\{\sigma\})(Q) ]\!]) > \delta \},
+$$
+
+where $\#$ is Lebesgue measure.
+```
+
 The omitted side conditions in the prose theorem are bundled explicitly:
 the alphabet and initial state are finite codes, the oracle is random,
 its range lies in a listed finite family of finite graph elements, and
@@ -625,6 +837,16 @@ thm-4-5 : ∀ H →
 ```
 
 ### 2.15 Section 5: the fair independent oracle
+
+```source
+It is an elementary exercise in measure theory to construct a random variable
+
+$$
+T : [0,1] \longrightarrow \mathcal{P}(\mathbb{N}),
+$$
+
+where for all $n$ we have $T(\{n\}) \in \{\{0\}, \{1\}\}$ in such a way that the events $[\![ T(\{0\}) = \{0\} ]\!],\ \ldots,\ [\![ T(\{n\}) = \{0\} ]\!]$ are each of probability $1/2$ and are jointly probabilistically independent. In other words, the infinite sequence $T(\{0\})$, $T(\{1\})$, $T(\{2\})$, $\ldots$, $T(\{n\})$, $\ldots$ represents in the model the tossing of a fair coin. Hence, when $F$ is computable, a combination $F(T)(X)$ can represent a Monte Carlo algorithm with the probability of the outcome depending on the values taken by the coins during the steps of the computation. In this way, with the aid of the model $\mathcal{P}(\mathbb{N})$ and with random variables, $\lambda$-calculus can be made stochastic.
+```
 
 The `n`th binary digit of the interval point chooses `{0}` or `{1}`.
 `oracle-op` turns these choices into a continuous operator, and its graph

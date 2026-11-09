@@ -295,6 +295,11 @@ def replace_fences(text: str, figure_captions: list[str]) -> tuple[str, dict[str
         nonlocal agda_idx, other_idx, figure_idx
         lang = match.group(1).strip().lower()
         body = match.group(2)
+        if lang == "source":
+            key = f"SOURCEINCLUDE{other_idx:03d}"
+            other_idx += 1
+            placeholders[key] = source_block_latex(body)
+            return f"\n\n{key}\n\n"
         if lang == "agda":
             key = f"AGDAINCLUDE{agda_idx:03d}"
             module = agda_titles.get(key, f"module-{agda_idx}")
@@ -337,6 +342,13 @@ def replace_fences(text: str, figure_captions: list[str]) -> tuple[str, dict[str
 
     converted = FENCE_RE.sub(repl, text)
     return converted, placeholders
+
+
+def source_block_latex(markdown: str) -> str:
+    """Render a Scott quotation as a breakable text box."""
+    inner = pandoc_to_latex(markdown.strip() + "\n", shift=False)
+    inner = cleanup_pandoc_latex(inner).strip()
+    return "\\begin{sourcequote}\n" + inner + "\n\\end{sourcequote}\n"
 
 
 def pandoc_to_latex(markdown: str, shift: bool = True) -> str:
