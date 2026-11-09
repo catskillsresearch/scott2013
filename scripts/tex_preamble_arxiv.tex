@@ -22,7 +22,14 @@
 \usepackage{listings}
 \usepackage{xurl}
 \usepackage[colorlinks=true,linkcolor=blue!40!black,citecolor=blue!40!black,urlcolor=blue!40!black]{hyperref}
+% Conor colours + \textsf code (same look as Mechanising Denotational Semantics in Agda).
+\usepackage[conor]{agda}
+% Holes / unreachable helpers from the highlight wrapper should not be shaded.
+\renewcommand{\AgdaDeadcode}[1]{#1}
+\AgdaNoSpaceAroundCode{}
 \emergencystretch=2em
+% Agda's proportional code boxes can trip tiny (≪1pt) overfull warnings.
+\hfuzz=1pt
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{axiom}[theorem]{Axiom}
@@ -38,16 +45,11 @@
 \let\origtextunderscore\_
 \renewcommand{\_}{\origtextunderscore\allowbreak}
 
-% Long inlined Agda listings can exhaust pdfTeX main memory; build locally with
-% LuaLaTeX (see .latexmkrc).  arXiv's AutoTeX has the headroom for pdfLaTeX.
-%
-% The listings are kept as real UTF-8 Agda source: every operator is rendered
-% through a `literate` replacement to a proper LaTeX symbol, so the code displays with
-% its native notation (∀ → ≡ ≢ ℕ …) under BOTH pdfLaTeX and LuaLaTeX.  Every
-% non-ASCII glyph that occurs in the sources must appear in this table.
+% Fallback listings style when a snippet cannot be highlighted by agda --latex.
+\newcommand{\AgdaListingFont}{\footnotesize\fontfamily{lmss}\selectfont}
 
 \lstdefinestyle{agdabox}{
-  basicstyle=\footnotesize\ttfamily,
+  basicstyle=\AgdaListingFont\color{AgdaSymbol},
   columns=fullflexible,
   keepspaces=true,
   breaklines=true,
@@ -56,6 +58,36 @@
   upquote=true,
   extendedchars=true,
   inputencoding=utf8,
+  % listings morekeywords/alsoletter must stay ASCII; Unicode ops go via literate=
+  alsoletter={0123456789-},
+  commentstyle=\color{AgdaComment}\ttfamily\itshape,
+  morecomment=[l]{--},
+  % Class 1: keywords (black). Class 2: types (blue). Class 3: functions (green).
+  keywordstyle=\color{AgdaKeyword}\AgdaListingFont,
+  keywordstyle=[2]\color{AgdaDatatype}\AgdaListingFont,
+  keywordstyle=[3]\color{AgdaFunction}\AgdaListingFont,
+  morekeywords={
+    abstract,constructor,coinductive,data,do,eta-equality,field,forall,
+    hiding,import,in,inductive,infix,infixl,infixr,instance,interleaved,
+    let,macro,module,mutual,no-eta-equality,opaque,open,overlap,pattern,
+    postulate,primitive,private,public,quote,quoteContext,quoteGoal,
+    quoteTerm,record,renaming,rewrite,syntax,tactic,to,unquote,
+    unquoteDecl,unquoteDef,using,variable,where,with,unfolding
+  },
+  morekeywords=[2]{
+    Set,Set1,Set2,Set3,Nat,Bool,List,Unit,
+    Continuous1,Continuous2,Computable1,Computable2,
+    Semi,RE,RESet,DFA,ScottDFA,MeasurableSpace,ProbabilityMeasure,
+    LebesgueUnitInterval,RandomVar,Event,Alphabet,Finite
+  },
+  morekeywords=[3]{
+    lam,lam2,pair,unpair,members,setp,star,subseteq,subset,
+    thm-3-1,thm-3-1-fwd,thm-3-1-bwd,thm-3-4,thm-3-5-outer,thm-3-5-inner,
+    thm-3-8-fixed,thm-3-8-least,thm-3-8-computable,
+    thm-3-10-inj,thm-3-10-cont,thm-3-10-open,
+    lam-app-fwd,lam-app-bwd,lam-largest,
+    search,sound,semi,Scott2013
+  },
   literate=
     {§}{{\S}}1
     {¬}{{\ensuremath{\neg}}}1
@@ -105,6 +137,13 @@
     {⦄}{{\textbraceright\textbraceright}}2
     {𝒵}{{\ensuremath{\mathcal{Z}}}}1
     {𝓕}{{\ensuremath{\mathcal{F}}}}1
+    {½}{{\ensuremath{\frac{1}{2}}}}1
+    {Φ}{{\ensuremath{\Phi}}}1
+    {Ψ}{{\ensuremath{\Psi}}}1
+    {Ω}{{\ensuremath{\Omega}}}1
+    {δ}{{\ensuremath{\delta}}}1
+    {ε}{{\ensuremath{\varepsilon}}}1
+    {μ}{{\ensuremath{\mu}}}1
     {ℕ}{{\ensuremath{\mathbb{N}}}}1
     {←}{{\ensuremath{\leftarrow}}}1
     {↑}{{\ensuremath{\uparrow}}}1
@@ -123,8 +162,10 @@
     {∀}{{\ensuremath{\forall}}}1
     {∃}{{\ensuremath{\exists}}}1
     {∅}{{\ensuremath{\emptyset}}}1
+    {∇}{{\ensuremath{\nabla}}}1
     {∈}{{\ensuremath{\in}}}1
     {∉}{{\ensuremath{\notin}}}1
+    {∎}{{\ensuremath{\qed}}}1
     {∘}{{\ensuremath{\circ}}}1
     {∋}{{\ensuremath{\ni}}}1
     {∩}{{\ensuremath{\cap}}}1
@@ -135,7 +176,9 @@
     {∧}{{\ensuremath{\wedge}}}1
     {∨}{{\ensuremath{\vee}}}1
     {∪}{{\ensuremath{\cup}}}1
+    {∷}{{\ensuremath{::}}}1
     {∼}{{\ensuremath{\sim}}}1
+    {≈}{{\ensuremath{\approx}}}1
     {≠}{{\ensuremath{\neq}}}1
     {≡}{{\ensuremath{\equiv}}}1
     {≢}{{\ensuremath{\not\equiv}}}1
@@ -145,6 +188,7 @@
     {≃}{{\ensuremath{\simeq}}}1
     {≅}{{\ensuremath{\cong}}}1
     {⊆}{{\ensuremath{\subseteq}}}1
+    {⊎}{{\ensuremath{\uplus}}}1
     {⊑}{{\ensuremath{\sqsubseteq}}}1
     {⊔}{{\ensuremath{\sqcup}}}1
     {⊓}{{\ensuremath{\sqcap}}}1
@@ -157,6 +201,7 @@
     {⊭}{{\ensuremath{\nvDash}}}1
     {⋀}{{\ensuremath{\bigwedge}}}1
     {⋁}{{\ensuremath{\bigvee}}}1
+    {⋯}{{\ensuremath{\cdots}}}1
     {─}{{\ensuremath{-}}}1
     {│}{{\ensuremath{|}}}1
     {└}{{+}}1
@@ -164,11 +209,26 @@
     {□}{{\ensuremath{\square}}}1
     {▸}{{\ensuremath{\blacktriangleright}}}1
     {◇}{{\ensuremath{\lozenge}}}1
+    {⟦}{{\ensuremath{[\![}}}2
+    {⟧}{{\ensuremath{]\!]}}}2
+    {⟪}{{\ensuremath{\langle\!\langle}}}2
+    {⟫}{{\ensuremath{\rangle\!\rangle}}}2
     {⟨}{{\ensuremath{\langle}}}1
     {⟩}{{\ensuremath{\rangle}}}1
     {⟶}{{\ensuremath{\longrightarrow}}}2
     {⟷}{{\ensuremath{\longleftrightarrow}}}2
     {⟹}{{\ensuremath{\Longrightarrow}}}2
+    {ᵇ}{{\textsuperscript{b}}}1
+    {ᵉ}{{\textsuperscript{e}}}1
+    {ᵣ}{{\textsubscript{r}}}1
+    {ₒ}{{\textsubscript{o}}}1
+    {ʳ}{{\textsuperscript{r}}}1
+    {″}{{\ensuremath{^{\prime\prime}}}}1
+    {𝒫}{{\ensuremath{\mathcal{P}}}}1
+    {𝕊}{{\ensuremath{\mathbb{S}}}}1
+    {𝕋}{{\ensuremath{\mathbb{T}}}}1
+    {𝕏}{{\ensuremath{\mathbb{X}}}}1
+    {𝕐}{{\ensuremath{\mathbb{Y}}}}1
 }
 \lstset{style=agdabox}
 

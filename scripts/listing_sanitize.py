@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""ASCII sanitization for Agda sources included via listings on arXiv (pdfLaTeX).
+"""Helpers for Agda listing chunks.
 
-The arXiv AutoTeX pipeline runs pdfLaTeX, which chokes on arbitrary UTF-8 inside
-`lstinputlisting` files. We therefore render the logical/mathematical operators to
-readable ASCII and drop anything still non-ASCII to `?` rather than break the build.
+Display listings keep UTF-8; the TeX preamble maps operators through listings
+`literate=` (and LuaLaTeX is the local PDF path). `sanitize_for_arxiv` remains
+available for emergency pdfLaTeX-only packaging, but the default build does not
+use it.
 """
 
 from __future__ import annotations

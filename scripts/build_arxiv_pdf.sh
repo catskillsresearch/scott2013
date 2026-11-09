@@ -9,11 +9,11 @@ PDF="arxiv.pdf"
 echo "==> Regenerating arxiv.tex + agda-listings/ + figures/"
 bash scripts/build_arxiv_tex.sh
 
-echo "==> Compiling PDF (pdfLaTeX via latexmk)"
+echo "==> Compiling PDF (LuaLaTeX via latexmk; keeps UTF-8 Agda listings)"
 latexmk -C "$TEX" >/dev/null 2>&1 || true
-rm -f arxiv.aux arxiv.out arxiv.toc
-latexmk -pdf \
-  -pdflatex="pdflatex -interaction=nonstopmode -halt-on-error" \
+rm -f arxiv.aux arxiv.out arxiv.toc arxiv.lof
+# .latexmkrc sets $pdf_mode=4 (lualatex). Do not force pdfLaTeX here.
+latexmk \
   -interaction=nonstopmode \
   -halt-on-error \
   "$TEX" >/dev/null 2>&1 || {

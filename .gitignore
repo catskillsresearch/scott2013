@@ -1,6 +1,8 @@
 # Agda interface files
 *.agdai
 _build/
+build/agda-hl/
+latex/
 
 # Python bytecode
 __pycache__/

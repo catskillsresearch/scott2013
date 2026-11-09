@@ -43,7 +43,7 @@ Use at submit time:
 
 ## Compiler
 
-pdfLaTeX (`00README.json` sets `"compiler": "pdflatex"`).
+LuaLaTeX (`00README.json` sets `"compiler": "lualatex"`).
 
 ## Repository
 

@@ -28,15 +28,19 @@ ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS))
 from ai_model_cards import inject_model_cards
-from listing_sanitize import chunk_line_ranges, sanitize_for_arxiv
+from agda_latex_highlight import highlight_to_listings_dir
+from listing_sanitize import chunk_line_ranges
 
 SRC = ROOT / "arxiv_with_code.md"
 OUT = ROOT / "arxiv.tex"
 PREAMBLE = SCRIPTS / "tex_preamble_arxiv.tex"
 LISTINGS_DIR = ROOT / "agda-listings"
 FIGURES_DIR = ROOT / "figures"
+SRC_AGDA_ROOT = ROOT / "src"
+SRC_SCOTT2013 = SRC_AGDA_ROOT / "Scott2013"
 PUPPETEER_CONFIG = SCRIPTS / "puppeteer-config.json"
 LISTING_CHUNK_LINES = 400
+_AGDA_SOURCES: dict[Path, str] | None = None
 
 GITHUB_URL = r"https://github.com/catskillsresearch/scott2013"
 REPORT_DATE = "September 2026"
@@ -147,33 +151,99 @@ def extract_abstract(text: str) -> tuple[str, str]:
 
 
 def write_listing(code: str, listing_name: str) -> tuple[str, int]:
+    """Write listing text as UTF-8 Agda/source; TeX renders operators via literate=."""
     LISTINGS_DIR.mkdir(parents=True, exist_ok=True)
-    source = sanitize_for_arxiv(code.rstrip("\n"))
+    source = code.rstrip("\n")
     listing_path = LISTINGS_DIR / listing_name
     listing_path.write_text(source + "\n", encoding="utf-8")
     rel_path = listing_path.relative_to(ROOT).as_posix()
     return rel_path, (len(source.splitlines()) if source else 0)
 
 
+def _agda_sources() -> dict[Path, str]:
+    global _AGDA_SOURCES
+    if _AGDA_SOURCES is None:
+        _AGDA_SOURCES = {
+            p: p.read_text(encoding="utf-8")
+            for p in sorted(SRC_AGDA_ROOT.rglob("*.agda"))
+        }
+    return _AGDA_SOURCES
+
+
+def path_from_scott2013(path: Path) -> str:
+    """Path as seen from cwd = src/Scott2013 (e.g. GraphModel/Basic.agda)."""
+    if path == SRC_AGDA_ROOT / "Scott2013.agda":
+        return "../Scott2013.agda"
+    try:
+        return path.relative_to(SRC_SCOTT2013).as_posix()
+    except ValueError:
+        return path.relative_to(SRC_AGDA_ROOT).as_posix()
+
+
+def resolve_listing_src_path(code: str) -> str | None:
+    """Best-match library file for a paper snippet, relative to src/Scott2013."""
+    lines = [
+        ln.strip()
+        for ln in code.splitlines()
+        if ln.strip() and not ln.strip().startswith("--")
+    ]
+    if not lines:
+        return None
+    best: Path | None = None
+    best_score = 0
+    for path, text in _agda_sources().items():
+        score = sum(1 for ln in lines if ln in text)
+        if score > best_score:
+            best_score = score
+            best = path
+    if best is None or best_score == 0:
+        return None
+    return path_from_scott2013(best)
+
+
+def listing_header(label: str, line_range: tuple[int, int] | None = None) -> str:
+    shown = label
+    if line_range is not None:
+        first, last = line_range
+        shown = f"{label} (lines {first}--{last})"
+    # Escape TeX specials that can appear in paths (rarely `_`).
+    shown_tex = shown.replace("_", "\\_")
+    return (
+        "\\vspace{0.5\\baselineskip}\n"
+        f"\\noindent\\textcolor{{AgdaFunction}}{{\\texttt{{{shown_tex}}}}}"
+        "\\par\\vspace{0.25\\baselineskip}\n"
+    )
+
+
 def agda_block_latex(code: str, listing_name: str) -> str:
     rel_path, line_count = write_listing(code, listing_name)
-    ranges = chunk_line_ranges(line_count, LISTING_CHUNK_LINES)
+    src_label = resolve_listing_src_path(code) or listing_name
+    hl = highlight_to_listings_dir(code, listing_name, LISTINGS_DIR)
+    header = listing_header(src_label)
+    if hl is not None:
+        hl_rel = hl.relative_to(ROOT).as_posix()
+        return (
+            f"{header}"
+            "\\begin{AgdaAlign}\n"
+            f"\\input{{{hl_rel}}}\n"
+            "\\end{AgdaAlign}\n"
+            "\\vspace{0.5\\baselineskip}\n\n"
+        )
 
+    # Fallback: listings + literate if Agda LaTeX highlighting fails.
+    ranges = chunk_line_ranges(line_count, LISTING_CHUNK_LINES)
     parts: list[str] = []
     for first, last in ranges:
         if first == 1 and last == line_count:
             parts.append(
-                "\\vspace{0.5\\baselineskip}\n"
-                "\\noindent\\textcolor{green!40!black}{\\textbf{Agda source}}"
-                "\\par\\vspace{0.25\\baselineskip}\n"
+                f"{header}"
                 f"\\lstinputlisting[style=agdabox]{{{rel_path}}}\n"
                 "\\vspace{0.5\\baselineskip}\n\n"
             )
         else:
             parts.append(
-                f"\\noindent\\textcolor{{green!40!black}}{{\\textbf{{Agda source "
-                f"(lines {first}--{last})}}}}\\par\\vspace{{0.25\\baselineskip}}\n"
-                f"\\lstinputlisting[style=agdabox,firstline={first},lastline={last}]"
+                listing_header(src_label, (first, last))
+                + f"\\lstinputlisting[style=agdabox,firstline={first},lastline={last}]"
                 f"{{{rel_path}}}\n\n"
             )
     return "".join(parts)
