@@ -30,3 +30,4 @@ dist/
 *.toc
 *.lof
 texput.log
+build
